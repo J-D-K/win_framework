@@ -5,19 +5,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// Child window.
-typedef struct
-{
-    // Child's handle.
-    HWND handle;
-    // Function to call when event occurs.
-    EventFunction eventFunction;
-    // Data to pass to eventFunction.
-    void *data;
-    // Child's ID.
-    int id;
-} Child;
-
 // Text struct so the window can draw the text on WM_PAINT.
 typedef struct
 {
@@ -30,26 +17,31 @@ typedef struct
 // Actual window.
 struct Window
 {
-    // Main window handle.
+    // Window handle.
     HWND handle;
     // Main application handle.
     HINSTANCE appHandle;
     // Window context.
     HDC context;
-    // Window font.
+    // Window font. To do: Have more than one and force comic sans as one of them no matter what.
     HFONT font;
-    // Dynamic array to hold children.
+    // Window color.
+    HBRUSH backgroundColor;
+    // Text color.
+    COLORREF textColor;
+    // Dynamic array to hold children. Both the main and children have this.
     DynamicArray *children;
-    // Array to hold text to draw to screen.
+    // Array to hold text to draw to screen. Children do not have this.
     DynamicArray *text;
-    // Keep track of children.
-    int childId;
+    // Only Child windows use this and the void *
+    EventFunction eventFunction;
+    // Data passed to ^
+    void *data;
 };
 
 // Declarations. Definitions at bottom of the file.
-static void windowDestroy(Window *window);
+static void windowDestroy(void *windowIn);
 static void textDestroy(void *text);
-static Child *findChildById(DynamicArray *children, int id);
 
 // Function that processes window events.
 static LRESULT windowEventHandler(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
@@ -60,50 +52,62 @@ static LRESULT windowEventHandler(HWND handle, UINT message, WPARAM wParam, LPAR
     // Handle the message.
     switch (message)
     {
-    case WM_PAINT:
-    {
-        // Draw text.
-        size_t textCount = dynamicArrayGetSize(window->text);
-        for (size_t i = 0; i < textCount; i++)
+        case WM_PAINT:
         {
-            Text *text = dynamicArrayGet(window->text, i);
-            if (!text)
+            // Draw text.
+            size_t textCount = dynamicArrayGetSize(window->text);
+            for (size_t i = 0; i < textCount; i++)
             {
-                break;
-            }
-            TextOut(window->context, text->x, text->y, text->text, text->length);
-        }
-    }
-    break;
-
-    case WM_COMMAND:
-    {
-        size_t childCount = dynamicArrayGetSize(window->children);
-        for (size_t i = 0; i < childCount; i++)
-        {
-            Child *child = dynamicArrayGet(window->children, i);
-            if (!child)
-            {
-                break;
-            }
-            else if (child->handle != (HWND)lParam)
-            {
-                continue;
-            }
-            // Execute the function.
-            if (child->eventFunction)
-            {
-                (*child->eventFunction)(window, wParam, child->data);
+                Text *text = dynamicArrayGet(window->text, i);
+                if (!text)
+                {
+                    break;
+                }
+                TextOut(window->context, text->x, text->y, text->text, text->length);
             }
         }
-    }
-    break;
+        break;
 
-    case WM_CLOSE:
-    {
-        windowDestroy(window);
-    }
-    break;
+        case WM_COMMAND:
+        {
+            // Just in case.
+            if (!window->children)
+            {
+                return 0;
+            }
+
+            // Loop through array and execute the event function if there is one.
+            size_t childCount = dynamicArrayGetSize(window->children);
+            for (size_t i = 0; i < childCount; i++)
+            {
+                Window *child = dynamicArrayGet(window->children, i);
+                if (!child || child->handle != (HWND)lParam)
+                {
+                    continue;
+                }
+                // Execute the function.
+                if (child->eventFunction)
+                {
+                    (*child->eventFunction)(window, wParam, child->data);
+                }
+            }
+        }
+        break;
+
+        case WM_CTLCOLORBTN:
+        case WM_CTLCOLORSTATIC:
+        {
+            SetBkMode((HDC)wParam, TRANSPARENT);
+            SetTextColor((HDC)wParam, RGB(0xFF, 0xFF, 0xFF));
+            return (LRESULT)window->backgroundColor;
+        }
+        break;
+
+        case WM_CLOSE:
+        {
+            windowDestroy(window);
+        }
+        break;
     }
     return DefWindowProc(handle, message, wParam, lParam);
 }
@@ -112,9 +116,7 @@ Window *windowCreate(const char *windowClass,
                      const char *title,
                      int width,
                      int height,
-                     const char *font,
                      COLORREF windowColor,
-                     COLORREF textColor,
                      HINSTANCE handle)
 {
     // Try to allocate window first.
@@ -123,6 +125,9 @@ Window *windowCreate(const char *windowClass,
     {
         return NULL;
     }
+
+    // Save these so shit looks right.
+    window->backgroundColor = CreateSolidBrush(windowColor);
 
     // Create and register class.
     WNDCLASSEX classEx = {.cbSize = sizeof(WNDCLASSEX),
@@ -133,7 +138,7 @@ Window *windowCreate(const char *windowClass,
                           .hInstance = handle,
                           .hIcon = NULL,
                           .hCursor = NULL,
-                          .hbrBackground = (HBRUSH)CreateSolidBrush(windowColor),
+                          .hbrBackground = window->backgroundColor,
                           .lpszMenuName = NULL,
                           .lpszClassName = windowClass,
                           .hIconSm = NULL};
@@ -144,7 +149,7 @@ Window *windowCreate(const char *windowClass,
     }
 
     // Create window.
-    window->handle = CreateWindowEx(WS_EX_CLIENTEDGE,
+    window->handle = CreateWindowEx(0,
                                     windowClass,
                                     title,
                                     WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
@@ -161,9 +166,24 @@ Window *windowCreate(const char *windowClass,
         free(window);
         return NULL;
     }
+    // Set font and make sure it's rendered with transparency.
+    window->context = GetDC(window->handle);
+    SetBkMode(window->context, TRANSPARENT);
 
+    // Set the pointer for this window handle to pass the window struct.
+    SetWindowLongPtr(window->handle, GWLP_USERDATA, (LONG_PTR)window);
+
+    // Allocate child and text arrays.
+    window->children = dynamicArrayCreate(sizeof(Window), windowDestroy);
+    window->text = dynamicArrayCreate(sizeof(Text), textDestroy);
+
+    return window;
+}
+
+void windowSetFont(Window *window, const char *fontName, int size)
+{
     // Load font.
-    window->font = CreateFont(16,
+    window->font = CreateFont(size,
                               0,
                               0,
                               0,
@@ -176,23 +196,17 @@ Window *windowCreate(const char *windowClass,
                               CLIP_DEFAULT_PRECIS,
                               CLEARTYPE_NATURAL_QUALITY,
                               FF_DONTCARE,
-                              font);
-    // Set font
-    window->context = GetDC(window->handle);
+                              fontName);
+
     SelectObject(window->context, window->font);
-    // Set transparency & text color.
-    SetTextColor(window->context, textColor);
-    SetBkColor(window->context, windowColor);
+}
 
-    // Set the pointer for this window handle to pass the window struct.
-    SetWindowLongPtr(window->handle, GWLP_USERDATA, (LONG_PTR)window);
-
-    // Allocate child and text arrays.
-    window->children = dynamicArrayCreate(sizeof(Child), NULL);
-    window->text = dynamicArrayCreate(sizeof(Text), textDestroy);
-    window->childId = 0;
-
-    return window;
+void windowSetTextColor(Window *window, COLORREF color)
+{
+    // Save the color.
+    window->textColor = color;
+    // Set it for the window.
+    SetTextColor(window->context, color);
 }
 
 void windowShow(Window *window)
@@ -215,6 +229,12 @@ bool windowUpdate(Window *window)
 
 void windowAddText(Window *window, int x, int y, const char *text)
 {
+    // Need this check so children can't be passed here.
+    if (!window->text)
+    {
+        return;
+    }
+
     // Allocate a new text struct.
     Text *newText = dynamicArrayNew(window->text);
     if (!newText)
@@ -238,13 +258,25 @@ void windowAddText(Window *window, int x, int y, const char *text)
     newText->y = y;
 }
 
-int windowAddTextInput(Window *window, int x, int y, int width, bool readonly, EventFunction eventFunction, void *data)
+Window *windowAddTextInput(Window *window,
+                           int x,
+                           int y,
+                           int width,
+                           bool readonly,
+                           EventFunction eventFunction,
+                           void *data)
 {
+    // Children check
+    if (!window->children)
+    {
+        return NULL;
+    }
+
     // Allocate new child.
-    Child *child = dynamicArrayNew(window->children);
+    Window *child = dynamicArrayNew(window->children);
     if (!child)
     {
-        return -1;
+        return NULL;
     }
 
     // Get text metrics for height.
@@ -268,32 +300,42 @@ int windowAddTextInput(Window *window, int x, int y, int width, bool readonly, E
                                    window->appHandle,
                                    NULL);
 
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = NULL;
+    child->font = window->font;
+    child->children = NULL;
+    child->text = NULL;
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
-    child->id = window->childId++;
 
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
-    // Return the ID.
-    return child->id;
+    return child;
 }
 
-int windowAddMultilineTextInput(Window *window,
-                                int x,
-                                int y,
-                                int width,
-                                int height,
-                                bool readonly,
-                                EventFunction eventFunction,
-                                void *data)
+Window *windowAddMultilineTextInput(Window *window,
+                                    int x,
+                                    int y,
+                                    int width,
+                                    int height,
+                                    bool readonly,
+                                    EventFunction eventFunction,
+                                    void *data)
 {
+    // Children check
+    if (!window->children)
+    {
+        return NULL;
+    }
+
     // Allocate new child.
-    Child *child = dynamicArrayNew(window->children);
+    Window *child = dynamicArrayNew(window->children);
     if (!child)
     {
-        return -1;
+        return NULL;
     }
 
     // Get text metrics for height.
@@ -308,25 +350,36 @@ int windowAddMultilineTextInput(Window *window,
     child->handle =
         CreateWindowEx(0, "EDIT", NULL, dwStyle, x, y, width, height, window->handle, NULL, window->appHandle, NULL);
 
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = NULL;
+    child->font = window->font;
+    child->children = NULL;
+    child->text = NULL;
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
-    child->id = window->childId++;
 
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
-    // Return the ID.
-    return child->id;
+    // Return the child window.
+    return child;
 }
 
-int windowAddPasswordInput(Window *window, int x, int y, int width, EventFunction eventFunction, void *data)
+Window *windowAddPasswordInput(Window *window, int x, int y, int width, EventFunction eventFunction, void *data)
 {
+    // Children check
+    if (!window->children)
+    {
+        return NULL;
+    }
+
     // Allocate new child.
-    Child *child = dynamicArrayNew(window->children);
+    Window *child = dynamicArrayNew(window->children);
     if (!child)
     {
-        return -1;
+        return NULL;
     }
 
     // Get text metrics for height.
@@ -347,57 +400,207 @@ int windowAddPasswordInput(Window *window, int x, int y, int width, EventFunctio
                                    window->appHandle,
                                    NULL);
 
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = NULL;
+    child->font = window->font;
+    child->children = NULL;
+    child->text = NULL;
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
-    child->id = window->childId++;
 
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
-    // Return the ID.
-    return child->id;
+    // Return the child window.
+    return child;
 }
 
-int windowAddButton(Window *window,
-                    int x,
-                    int y,
-                    int width,
-                    const char *buttonText,
-                    EventFunction eventFunction,
-                    void *data)
+Window *windowAddButton(Window *window,
+                        int x,
+                        int y,
+                        int width,
+                        int height,
+                        const char *buttonText,
+                        DWORD style,
+                        EventFunction eventFunction,
+                        void *data)
 {
-    Child *child = dynamicArrayNew(window->children);
+    // Children check
+    if (!window->children)
+    {
+        return NULL;
+    }
+
+    Window *child = dynamicArrayNew(window->children);
     if (!child)
     {
-        return -1;
+        return NULL;
     }
 
     // Need this to calculate button height.
-    TEXTMETRIC textMetrics;
-    GetTextMetrics(window->context, &textMetrics);
+    if (height == AUTO_SIZE)
+    {
+        TEXTMETRIC textMetrics;
+        GetTextMetrics(window->context, &textMetrics);
+        height = textMetrics.tmHeight + 4;
+    }
 
     // Create the button.
     child->handle = CreateWindowEx(0,
                                    "BUTTON",
                                    buttonText,
-                                   WS_CHILD | WS_BORDER | WS_VISIBLE,
+                                   WS_CHILD | WS_VISIBLE | style,
                                    x,
                                    y,
                                    width,
-                                   textMetrics.tmHeight + 4,
+                                   height,
+                                   window->handle,
+                                   NULL,
+                                   window->appHandle,
+                                   NULL);
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->children = NULL;
+    child->context = GetDC(child->handle);
+    // This might need to be carried over.
+    child->font = window->font;
+    child->text = NULL;
+    // Make sure we set the function and ID.
+    child->eventFunction = eventFunction;
+    child->data = data;
+
+    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
+
+    return child;
+}
+
+Window *windowAddComboxBox(Window *window,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           DWORD style,
+                           EventFunction eventFunction,
+                           void *data)
+{
+    if (!window->children)
+    {
+        return NULL;
+    }
+
+    Window *child = dynamicArrayNew(window->children);
+    if (!child)
+    {
+        return NULL;
+    }
+
+    child->handle = CreateWindowEx(0,
+                                   "COMBOBOX",
+                                   NULL,
+                                   WS_CHILD | WS_VISIBLE | WS_BORDER | style,
+                                   x,
+                                   y,
+                                   width,
+                                   height,
                                    window->handle,
                                    NULL,
                                    window->appHandle,
                                    NULL);
 
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = NULL;
+    // This might need to be carried over.
+    child->font = window->font;
+    child->children = NULL;
+    child->text = NULL;
+    // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
-    child->id = window->childId++;
 
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
-    return child->id;
+    return child;
+}
+
+Window *windowAddProgressBar(Window *window, int x, int y, int width, int height, DWORD style)
+{
+    if (!window->children)
+    {
+        return NULL;
+    }
+
+    Window *child = dynamicArrayNew(window->children);
+    if (!child)
+    {
+        return NULL;
+    }
+
+    child->handle = CreateWindowEx(0,
+                                   PROGRESS_CLASS,
+                                   NULL,
+                                   WS_CHILD | WS_VISIBLE | style,
+                                   x,
+                                   y,
+                                   width,
+                                   height,
+                                   window->handle,
+                                   NULL,
+                                   window->appHandle,
+                                   NULL);
+
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = NULL;
+    child->font = NULL;
+    child->children = NULL;
+    child->text = NULL;
+    child->eventFunction = NULL;
+    child->data = NULL;
+
+    return child;
+}
+
+Window *windowAddStatic(Window *window, int x, int y, int width, int height)
+{
+    if (!window->children)
+    {
+        return NULL;
+    }
+
+    Window *child = dynamicArrayNew(window->children);
+    if (!child)
+    {
+        return NULL;
+    }
+
+    child->handle = CreateWindowEx(0,
+                                   "STATIC",
+                                   NULL,
+                                   WS_CHILD | WS_GROUP | WS_VISIBLE | WS_BORDER | SS_NOTIFY,
+                                   x,
+                                   y,
+                                   width,
+                                   height,
+                                   window->handle,
+                                   NULL,
+                                   window->appHandle,
+                                   NULL);
+
+    // This does have children.
+    child->children = dynamicArrayCreate(sizeof(Window), windowDestroy);
+
+    // NULL the rest for this.
+    child->appHandle = NULL;
+    child->context = GetDC(child->handle);
+    child->font = NULL;
+    child->text = NULL;
+    child->eventFunction = NULL;
+    child->data = NULL;
+
+    return child;
 }
 
 HWND windowGetHandle(Window *window)
@@ -405,51 +608,35 @@ HWND windowGetHandle(Window *window)
     return window->handle;
 }
 
-bool windowGetTextFromInput(Window *window, int id, char *buffer, size_t bufferSize)
+bool windowGetText(Window *window, char *buffer, size_t bufferSize)
 {
-    // Get the child by the ID. Bail if it's not found.
-    Child *child = findChildById(window->children, id);
-    if (!child)
-    {
-        return false;
-    }
-
     // Get the length first before continuing.
-    size_t textLength = SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0);
+    size_t textLength = SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
     if (textLength + 1 >= bufferSize)
     {
         return false;
     }
-
-    return SendMessage(child->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
+    return SendMessage(window->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
 }
 
-bool windowSetInputText(Window *window, int id, const char *text)
+bool windowSetText(Window *window, const char *text)
 {
-    Child *child = findChildById(window->children, id);
-    if (!child)
-    {
-        return false;
-    }
-    // This is easy.
-    return SendMessage(child->handle, WM_SETTEXT, 0, (LONG_PTR)text) == TRUE;
+    return SendMessage(window->handle, WM_SETTEXT, 0, (LONG_PTR)text) == TRUE;
 }
 
-bool windowAppendInputText(Window *window, int id, const char *text)
+void windowAppendText(Window *window, const char *text)
 {
-    Child *child = findChildById(window->children, id);
-    if (!child)
-    {
-        return false;
-    }
     // First we need to make sure the cursor is at the end. The -1 should rollover to the end.
-    SendMessage(child->handle, EM_SETSEL, -1, -1);
+    SendMessage(window->handle, EM_SETSEL, -1, -1);
     // Now we use replace to append it. I'm not sure how else to do this without having to read and append it and that seems stupid.
-    SendMessage(child->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
+    SendMessage(window->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
 }
 
-static void windowDestroy(Window *window)
+// This frees the memory associated with window.
+static void windowDestroy(void *windowIn)
 {
+    Window *window = (Window *)windowIn;
+
     // Destroy text and children.
     dynamicArrayDestroy(window->text);
     dynamicArrayDestroy(window->children);
@@ -470,21 +657,4 @@ static void textDestroy(void *text)
         free(textIn->text);
     }
     free(textIn);
-}
-
-// This searches for a child by the ID passed.
-static Child *findChildById(DynamicArray *children, int id)
-{
-    Child *child = NULL;
-    size_t arraySize = dynamicArrayGetSize(children);
-    for (size_t i = 0; i < arraySize; i++)
-    {
-        Child *subChild = dynamicArrayGet(children, i);
-        if (subChild->id == id)
-        {
-            child = subChild;
-            break;
-        }
-    }
-    return child;
 }
