@@ -4,41 +4,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
-#include <uxtheme.h>
 
-// Text struct so the window can draw the text on WM_PAINT.
-typedef struct
-{
-    // X and Y coordinates.
-    int x, y, length;
-    // Text buffer.
-    char *text;
-} Text;
-
-// Actual window.
-struct Window
-{
-    // Window handle.
-    HWND handle;
-    // Main application handle.
-    HINSTANCE appHandle;
-    // Window context.
-    HDC context;
-    // Window font. To do: Have more than one and force comic sans as one of them no matter what.
-    HFONT font;
-    // Window color.
-    HBRUSH backgroundColor;
-    // Text color.
-    COLORREF textColor;
-    // Dynamic array to hold children. Both the main and children have this.
-    DynamicArray *children;
-    // Array to hold text to draw to screen. Children do not have this.
-    DynamicArray *text;
-    // Only Child windows use this and the void *
-    EventFunction eventFunction;
-    // Data passed to ^
-    void *data;
-};
+#define __WINDOW_INTERNAL__
+#include "Window_internal.h"
 
 // Declarations. Definitions at bottom of the file.
 static void windowDestroy(void *windowIn);
@@ -257,59 +225,6 @@ void windowAddText(Window *window, int x, int y, const char *text)
     newText->y = y;
 }
 
-Window *windowAddEdit(Window *window,
-                      int x,
-                      int y,
-                      int width,
-                      int height,
-                      DWORD style,
-                      EventFunction eventFunction,
-                      void *data)
-{
-    // Children check
-    if (!window->children)
-    {
-        return NULL;
-    }
-
-    // Allocate new child.
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    if (height == AUTO_SIZE)
-    {
-        // Get text metrics for height.
-        TEXTMETRIC textMetrics;
-        GetTextMetrics(window->context, &textMetrics);
-
-        height = textMetrics.tmHeight + 4;
-    }
-
-    // Style.
-    DWORD dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | style;
-
-    // Create a single lined edit input.
-    child->handle =
-        CreateWindowEx(0, "EDIT", NULL, dwStyle, x, y, width, height, window->handle, NULL, window->appHandle, NULL);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
-
-    // Set the font.
-    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
-
-    return child;
-}
 
 Window *windowAddButton(Window *window,
                         int x,
@@ -370,127 +285,20 @@ Window *windowAddButton(Window *window,
     return child;
 }
 
-Window *windowAddComboxBox(Window *window,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           DWORD style,
-                           EventFunction eventFunction,
-                           void *data)
-{
-    if (!window->children)
-    {
-        return NULL;
-    }
-
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    child->handle = CreateWindowEx(0,
-                                   "COMBOBOX",
-                                   NULL,
-                                   WS_CHILD | WS_VISIBLE | WS_BORDER | style,
-                                   x,
-                                   y,
-                                   width,
-                                   height,
-                                   window->handle,
-                                   NULL,
-                                   window->appHandle,
-                                   NULL);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    // This might need to be carried over.
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
-
-    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
-
-    return child;
-}
-
-Window *windowAddProgressBar(Window *window, int x, int y, int width, int height, DWORD style)
-{
-    if (!window->children)
-    {
-        return NULL;
-    }
-
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    child->handle = CreateWindowEx(0,
-                                   PROGRESS_CLASS,
-                                   NULL,
-                                   WS_CHILD | WS_VISIBLE | style,
-                                   x,
-                                   y,
-                                   width,
-                                   height,
-                                   window->handle,
-                                   NULL,
-                                   window->appHandle,
-                                   NULL);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    child->font = NULL;
-    child->children = NULL;
-    child->text = NULL;
-    child->eventFunction = NULL;
-    child->data = NULL;
-
-    return child;
-}
-
 HWND windowGetHandle(Window *window)
 {
     return window->handle;
 }
 
-bool windowGetText(Window *window, char *buffer, size_t bufferSize)
-{
-    // Get the length first before continuing.
-    size_t textLength = SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
-    if (textLength + 1 >= bufferSize)
-    {
-        return false;
-    }
-    return SendMessage(window->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
-}
-
-bool windowSetText(Window *window, const char *text)
-{
-    return SendMessage(window->handle, WM_SETTEXT, 0, (LONG_PTR)text) == TRUE;
-}
-
-void windowAppendText(Window *window, const char *text)
-{
-    // First we need to make sure the cursor is at the end. The -1 should rollover to the end.
-    SendMessage(window->handle, EM_SETSEL, -1, -1);
-    // Now we use replace to append it. I'm not sure how else to do this without having to read and append it and that seems stupid.
-    SendMessage(window->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
-}
-
 // This frees the memory associated with window.
 static void windowDestroy(void *windowIn)
 {
+    if (!windowIn)
+    {
+        return;
+    }
+    // Cast to window.
     Window *window = (Window *)windowIn;
-
     // Destroy text and children.
     dynamicArrayDestroy(window->text);
     dynamicArrayDestroy(window->children);
