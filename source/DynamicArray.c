@@ -36,6 +36,13 @@ DynamicArray *dynamicArrayCreate(size_t elementSize, ElementFreeFunction freeFun
 
 void dynamicArrayDestroy(DynamicArray *array)
 {
+    // Oops...
+    if (!array)
+    {
+        // Abort mission.
+        return;
+    }
+
     // If the free function is defined, use that.
     if (array->freeFunction)
     {

@@ -66,44 +66,17 @@ extern "C"
     /// @param y Y coordinate of input.
     /// @param width Width of the input box.
     /// @param background Color of the background of the input.
-    /// @param readonly Whether or not the input is readonly.
     /// @param style Style of EDIT control.
     /// @param eventFunction Function that is called for an event.
     /// @return Handle of the window/child on success. NULL on failure.
-    Window *windowAddTextInput(Window *window,
-                               int x,
-                               int y,
-                               int width,
-                               bool readonly,
-                               EventFunction eventFunction,
-                               void *data);
-
-    /// @brief Adds a multiline text input to the window.
-    /// @param window Window to add text input to.
-    /// @param x X coordinate of the text input.
-    /// @param y Y coordinate of the text input.
-    /// @param width Width of the text input.
-    /// @param height Height of the text input. AUTO_SIZE is not valid for this control.
-    /// @param eventFunction Function to be executed when an event occurs with the input.
-    /// @param data Data pointer passed to the function above.
-    /// @return Handle of the window/child on success. NULL on failure.
-    Window *windowAddMultilineTextInput(Window *window,
-                                        int x,
-                                        int y,
-                                        int width,
-                                        int height,
-                                        bool readonly,
-                                        EventFunction eventFunction,
-                                        void *data);
-
-    /// @brief Adds a password style input to the window.
-    /// @param window Window to add password to.
-    /// @param x X coordinate of input.
-    /// @param y Y coordinate of input.
-    /// @param width Width of the input box.
-    /// @param eventFunction Function that is called for an event.
-    /// @return Handle of the window/child on success. NULL on failure.
-    Window *windowAddPasswordInput(Window *window, int x, int y, int width, EventFunction eventFunction, void *data);
+    Window *windowAddEdit(Window *window,
+                          int x,
+                          int y,
+                          int width,
+                          int height,
+                          DWORD style,
+                          EventFunction eventFunction,
+                          void *data);
 
     /// @brief Adds a button to the
     /// @param window Window to add the button to.

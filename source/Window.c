@@ -4,6 +4,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <uxtheme.h>
 
 // Text struct so the window can draw the text on WM_PAINT.
 typedef struct
@@ -95,10 +96,8 @@ static LRESULT windowEventHandler(HWND handle, UINT message, WPARAM wParam, LPAR
         break;
 
         case WM_CTLCOLORBTN:
-        case WM_CTLCOLORSTATIC:
         {
             SetBkMode((HDC)wParam, TRANSPARENT);
-            SetTextColor((HDC)wParam, RGB(0xFF, 0xFF, 0xFF));
             return (LRESULT)window->backgroundColor;
         }
         break;
@@ -258,13 +257,14 @@ void windowAddText(Window *window, int x, int y, const char *text)
     newText->y = y;
 }
 
-Window *windowAddTextInput(Window *window,
-                           int x,
-                           int y,
-                           int width,
-                           bool readonly,
-                           EventFunction eventFunction,
-                           void *data)
+Window *windowAddEdit(Window *window,
+                      int x,
+                      int y,
+                      int width,
+                      int height,
+                      DWORD style,
+                      EventFunction eventFunction,
+                      void *data)
 {
     // Children check
     if (!window->children)
@@ -279,72 +279,17 @@ Window *windowAddTextInput(Window *window,
         return NULL;
     }
 
-    // Get text metrics for height.
-    TEXTMETRIC textMetrics;
-    GetTextMetrics(window->context, &textMetrics);
-
-    // Style.
-    DWORD dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | ES_AUTOHSCROLL | (readonly ? ES_READONLY : 0);
-
-    // Create a single lined edit input.
-    child->handle = CreateWindowEx(0,
-                                   "EDIT",
-                                   NULL,
-                                   dwStyle,
-                                   x,
-                                   y,
-                                   width,
-                                   textMetrics.tmHeight + 4,
-                                   window->handle,
-                                   NULL,
-                                   window->appHandle,
-                                   NULL);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
-
-    // Set the font.
-    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
-
-    return child;
-}
-
-Window *windowAddMultilineTextInput(Window *window,
-                                    int x,
-                                    int y,
-                                    int width,
-                                    int height,
-                                    bool readonly,
-                                    EventFunction eventFunction,
-                                    void *data)
-{
-    // Children check
-    if (!window->children)
+    if (height == AUTO_SIZE)
     {
-        return NULL;
+        // Get text metrics for height.
+        TEXTMETRIC textMetrics;
+        GetTextMetrics(window->context, &textMetrics);
+
+        height = textMetrics.tmHeight + 4;
     }
 
-    // Allocate new child.
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    // Get text metrics for height.
-    TEXTMETRIC textMetrics;
-    GetTextMetrics(window->context, &textMetrics);
-
     // Style.
-    DWORD dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_VSCROLL | ES_MULTILINE |
-                    (readonly ? ES_READONLY : 0);
+    DWORD dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | style;
 
     // Create a single lined edit input.
     child->handle =
@@ -363,57 +308,6 @@ Window *windowAddMultilineTextInput(Window *window,
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
-    // Return the child window.
-    return child;
-}
-
-Window *windowAddPasswordInput(Window *window, int x, int y, int width, EventFunction eventFunction, void *data)
-{
-    // Children check
-    if (!window->children)
-    {
-        return NULL;
-    }
-
-    // Allocate new child.
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    // Get text metrics for height.
-    TEXTMETRIC textMetrics;
-    GetTextMetrics(window->context, &textMetrics);
-
-    // Create a single lined edit input.
-    child->handle = CreateWindowEx(0,
-                                   "EDIT",
-                                   NULL,
-                                   WS_CHILD | WS_BORDER | WS_VISIBLE | ES_AUTOHSCROLL | ES_PASSWORD,
-                                   x,
-                                   y,
-                                   width,
-                                   textMetrics.tmHeight + 4,
-                                   window->handle,
-                                   NULL,
-                                   window->appHandle,
-                                   NULL);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
-
-    // Set the font.
-    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
-
-    // Return the child window.
     return child;
 }
 
@@ -556,46 +450,6 @@ Window *windowAddProgressBar(Window *window, int x, int y, int width, int height
     child->context = NULL;
     child->font = NULL;
     child->children = NULL;
-    child->text = NULL;
-    child->eventFunction = NULL;
-    child->data = NULL;
-
-    return child;
-}
-
-Window *windowAddStatic(Window *window, int x, int y, int width, int height)
-{
-    if (!window->children)
-    {
-        return NULL;
-    }
-
-    Window *child = dynamicArrayNew(window->children);
-    if (!child)
-    {
-        return NULL;
-    }
-
-    child->handle = CreateWindowEx(0,
-                                   "STATIC",
-                                   NULL,
-                                   WS_CHILD | WS_GROUP | WS_VISIBLE | WS_BORDER | SS_NOTIFY,
-                                   x,
-                                   y,
-                                   width,
-                                   height,
-                                   window->handle,
-                                   NULL,
-                                   window->appHandle,
-                                   NULL);
-
-    // This does have children.
-    child->children = dynamicArrayCreate(sizeof(Window), windowDestroy);
-
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = GetDC(child->handle);
-    child->font = NULL;
     child->text = NULL;
     child->eventFunction = NULL;
     child->data = NULL;

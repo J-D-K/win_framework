@@ -16,5 +16,5 @@ set(SOURCE_FILES
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O2)
-# target_link_options(${PROJECT_NAME} PRIVATE -s)
+target_link_options(${PROJECT_NAME} PRIVATE -s -mwindows)
 target_link_libraries(${PROJECT_NAME} PRIVATE -lgdi32 -lcomctl32)
