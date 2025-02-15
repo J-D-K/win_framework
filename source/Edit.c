@@ -57,11 +57,16 @@ Window *windowAddEdit(Window *window,
     return child;
 }
 
+int editGetTextLength(Window *window)
+{
+    return SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
+}
+
 bool editGetText(Window *window, char *buffer, size_t bufferSize)
 {
     // Get the length first before continuing.
     size_t textLength = SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
-    if (textLength + 1 >= bufferSize)
+    if (textLength + 1 > bufferSize)
     {
         return false;
     }

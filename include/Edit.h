@@ -25,6 +25,11 @@ extern "C"
                           EventFunction eventFunction,
                           void *data);
 
+    /// @brief Gets the length of the text in the edit control.
+    /// @param window Edit to get the length of.
+    /// @return Length of the text.
+    int editGetTextLength(Window *window);
+
     /// @brief Retrieves the text from a window.
     /// @param window Window of input.
     /// @param id ID of the input.

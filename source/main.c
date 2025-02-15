@@ -1,49 +1,55 @@
 #include "Window.h"
-#include <unistd.h>
+#include <string.h>
 
-COLORREF WINDOW_BACKGROUND = RGB(0x4D, 0x4D, 0x4D);
-COLORREF EDIT_BACKGROUND = RGB(0x2D, 0x2D, 0x2D);
-COLORREF TEXT_COLOR = RGB(0xFF, 0xFF, 0xFF);
+// Window background color
+static const COLORREF WINDOW_BACKGROUND = RGB(0xBB, 0xBB, 0xBB);
+// Text color.
+static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 
-void getFileName(Window *window, WPARAM wParam, void *data)
+void buttonClick(Window *window, WPARAM wParam, void *dataIn)
 {
+    // This should get a pointer to the input.
+    Window *textInput = (Window *)dataIn;
+
+    // Get the length of the text.
+    int inputLength = editGetTextLength(textInput);
+    if (inputLength <= 0)
+    {
+        // Just bail. There's nothing to show.
+        return;
+    }
+
+    // Get the length. Add one, because I don't think Windows includes the null terminator.
+    char inputBuffer[inputLength + 1];
+    memset(inputBuffer, 0x00, inputLength + 1);
+    editGetText(textInput, inputBuffer, inputLength + 1);
+
+    MessageBox(windowGetHandle(window), inputBuffer, "Input Text", MB_ICONEXCLAMATION);
 }
 
-int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHandle, char *commandline, int showCmd)
+int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
-    Window *mainWindow = windowCreate("MainWindow", "MainWindow", 320, 240, WINDOW_BACKGROUND, handle);
+    Window *mainWindow = windowCreate("win_framework", "Main Window", 640, 480, WINDOW_BACKGROUND, handle);
     if (!mainWindow)
     {
-        MessageBox(NULL, "Error creating main window!", "Error", MB_ICONERROR);
+        MessageBox(NULL, "Error creating main window.", "Error", MB_ICONERROR);
         return -1;
     }
 
-    // Set the window font to arial.
-    windowSetFont(mainWindow, "Franklin Gothic Medium", 16);
+    // Set text crap.
+    windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    Window *box = windowAddComboxBox(mainWindow, 8, 8, 240, 160, CBS_DROPDOWN, NULL, NULL);
-    comboBoxAddString(box, "String A");
-    comboBoxAddString(box, "String B");
-    comboBoxAddString(box, "String C");
-    comboBoxAddString(box, "String D");
+    // This doesn't really need its pointer saved.
+    windowAddButton(mainWindow, 4, 4, 624, 40, "Input Text:", BS_GROUPBOX, NULL, NULL);
+    Window *textInput = windowAddEdit(mainWindow, 8, 20, 616, AUTO_SIZE, ES_AUTOHSCROLL, NULL, NULL);
+    windowAddButton(mainWindow, 272, 48, 96, AUTO_SIZE, "Click Me", BS_CENTER, buttonClick, textInput);
 
-    Window *bar = windowAddProgressBar(mainWindow, 8, 32, 224, 24, PBS_SMOOTH);
-    progressBarSetRange(bar, 0, 60);
-
-    // Show the window.
     windowShow(mainWindow);
 
-    // This is just a stupid test loop.
-    for (int i = 0; i < 60; i++)
-    {
-        progressBarAdvance(bar, 1);
-        sleep(1);
-    }
-
-    // Update the window.
     while (windowUpdate(mainWindow))
     {
-    };
+    }
+    // Window automatically destroys itself when the WM_CLOSE command is received.
     return 0;
 }
