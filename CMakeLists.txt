@@ -17,5 +17,5 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/resources.rc)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O2)
-target_link_options(${PROJECT_NAME} PRIVATE -s -static-libgcc -static -mwindows)
-target_link_libraries(${PROJECT_NAME} -lgdi32 -lcomctl32)
+target_link_options(${PROJECT_NAME} PRIVATE -s -static-libgcc -static)
+target_link_libraries(${PROJECT_NAME} PRIVATE -lgdi32 -lcomctl32)

@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHInstance, char *commandline, in
 
     // This doesn't really need its pointer saved.
     windowAddButton(mainWindow, 4, 4, 624, 40, "Input Text:", BS_GROUPBOX, NULL, NULL);
-    Window *textInput = windowAddEdit(mainWindow, 8, 20, 616, AUTO_SIZE, ES_AUTOHSCROLL, NULL, NULL);
+    Window *textInput = windowAddEdit(mainWindow, 8, 20, 616, AUTO_SIZE, ES_AUTOHSCROLL | ES_READONLY, NULL, NULL);
     windowAddButton(mainWindow, 272, 48, 96, AUTO_SIZE, "Click Me", BS_CENTER, buttonClick, textInput);
 
     windowShow(mainWindow);

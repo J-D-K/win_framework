@@ -64,9 +64,21 @@ static LRESULT windowEventHandler(HWND handle, UINT message, WPARAM wParam, LPAR
         break;
 
         case WM_CTLCOLORBTN:
+        case WM_CTLCOLORSTATIC:
         {
-            SetBkMode((HDC)wParam, TRANSPARENT);
-            return (LRESULT)window->backgroundColor;
+            // This is needed so read-only edits don't get colored weird.
+            char className[32] = {0}; // Class names can only be 32 chars long.
+            GetClassName((HWND)lParam, className, 32);
+            if (strcmp(className, "Edit") == 0)
+            {
+                SetBkMode((HDC)wParam, OPAQUE);
+                return (LRESULT)CreateSolidBrush(RGB(0xFF, 0xFF, 0xFF));
+            }
+            else
+            {
+                SetBkMode((HDC)wParam, TRANSPARENT);
+                return (LRESULT)window->backgroundColor;
+            }
         }
         break;
 

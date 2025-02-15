@@ -15,7 +15,7 @@ extern "C"
     typedef struct Window Window;
 
     /// @brief Event function definition.
-    typedef void (*EventFunction)(Window *window, WPARAM, void *);
+    typedef void (*EventFunction)(Window *, WPARAM, void *);
 
 #ifdef __cplusplus
 }
