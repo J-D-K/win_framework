@@ -3,6 +3,7 @@
 #include "ComboBox.h"
 #include "Edit.h"
 #include "ProgressBar.h"
+#include "Tab.h"
 #include <stdbool.h>
 #include <windows.h>
 // This needs to be here. Seems to conflict with windows.h
@@ -28,6 +29,16 @@ extern "C"
                          int height,
                          COLORREF windowColor,
                          HINSTANCE handle);
+
+    /// @brief Loads and sets the big icon of the window.
+    /// @param window Window to set the icon for.
+    /// @param resource Int value of resource in resources file.
+    void windowSetBigIcon(Window *window, int resource);
+
+    /// @brief Loads and sets the small icon of the window.
+    /// @param window Window to set the icon for.
+    /// @param resource Int value of resource in resources file.
+    void windowSetSmallIcon(Window *window, int resource);
 
     /// @brief Creates and sets the system font.
     /// @param window Window to set the font for.

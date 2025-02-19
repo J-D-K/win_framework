@@ -9,7 +9,7 @@ static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 void buttonClick(Window *window, WPARAM wParam, void *dataIn)
 {
     // This should get a pointer to the input.
-    Window *textInput = (Window *)dataIn;
+    Child *textInput = (Child *)dataIn;
 
     // Get the length of the text.
     int inputLength = editGetTextLength(textInput);
@@ -40,10 +40,11 @@ int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHInstance, char *commandline, in
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    // This doesn't really need its pointer saved.
-    windowAddButton(mainWindow, 4, 4, 624, 40, "Input Text:", BS_GROUPBOX, NULL, NULL);
-    Window *textInput = windowAddEdit(mainWindow, 8, 20, 616, AUTO_SIZE, ES_AUTOHSCROLL | ES_READONLY, NULL, NULL);
-    windowAddButton(mainWindow, 272, 48, 96, AUTO_SIZE, "Click Me", BS_CENTER, buttonClick, textInput);
+    Child *tabControl = windowAddTabControl(mainWindow, 0, 0, 640, 480, TCS_FLATBUTTONS, NULL, NULL);
+    tabControlAddTab(tabControl, 0, "Tab A", NULL);
+    tabControlAddTab(tabControl, 1, "Tab B", NULL);
+    tabControlAddTab(tabControl, 2, "Tab C", NULL);
+    tabControlAddTab(tabControl, 3, "Tab D", NULL);
 
     windowShow(mainWindow);
 

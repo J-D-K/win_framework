@@ -3,14 +3,14 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Window *windowAddEdit(Window *window,
-                      int x,
-                      int y,
-                      int width,
-                      int height,
-                      DWORD style,
-                      EventFunction eventFunction,
-                      void *data)
+Child *windowAddEdit(Window *window,
+                     int x,
+                     int y,
+                     int width,
+                     int height,
+                     DWORD style,
+                     EventFunction eventFunction,
+                     void *data)
 {
     // Children check
     if (!window->children)
@@ -19,7 +19,7 @@ Window *windowAddEdit(Window *window,
     }
 
     // Allocate new child.
-    Window *child = dynamicArrayNew(window->children);
+    Child *child = dynamicArrayNew(window->children);
     if (!child)
     {
         return NULL;
@@ -41,12 +41,6 @@ Window *windowAddEdit(Window *window,
     child->handle =
         CreateWindowEx(0, "EDIT", NULL, dwStyle, x, y, width, height, window->handle, NULL, window->appHandle, NULL);
 
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
@@ -57,31 +51,31 @@ Window *windowAddEdit(Window *window,
     return child;
 }
 
-int editGetTextLength(Window *window)
+int editGetTextLength(Child *child)
 {
-    return SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
+    return SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0);
 }
 
-bool editGetText(Window *window, char *buffer, size_t bufferSize)
+bool editGetText(Child *child, char *buffer, size_t bufferSize)
 {
     // Get the length first before continuing.
-    size_t textLength = SendMessage(window->handle, WM_GETTEXTLENGTH, 0, 0);
+    size_t textLength = SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0);
     if (textLength + 1 > bufferSize)
     {
         return false;
     }
-    return SendMessage(window->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
+    return SendMessage(child->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
 }
 
-bool editSetText(Window *window, const char *text)
+bool editSetText(Child *child, const char *text)
 {
-    return SendMessage(window->handle, WM_SETTEXT, 0, (LONG_PTR)text) == TRUE;
+    return SendMessage(child->handle, WM_SETTEXT, 0, (LONG_PTR)text) == TRUE;
 }
 
-void editAppendText(Window *window, const char *text)
+void editAppendText(Child *child, const char *text)
 {
     // First we need to make sure the cursor is at the end. The -1 should rollover to the end.
-    SendMessage(window->handle, EM_SETSEL, -1, -1);
+    SendMessage(child->handle, EM_SETSEL, -1, -1);
     // Now we use replace to append it. I'm not sure how else to do this without having to read and append it and that seems stupid.
-    SendMessage(window->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
+    SendMessage(child->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
 }

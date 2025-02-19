@@ -18,25 +18,25 @@ extern "C"
     /// @param style Style of button to use.
     /// @param eventFunction Function to execute on button triggering and event.
     /// @return Handle of the window/child on success. NULL on failure.
-    Window *windowAddButton(Window *window,
-                            int x,
-                            int y,
-                            int width,
-                            int height,
-                            const char *buttonText,
-                            DWORD style,
-                            EventFunction eventFunction,
-                            void *data);
+    Child *windowAddButton(Window *window,
+                           int x,
+                           int y,
+                           int width,
+                           int height,
+                           const char *buttonText,
+                           DWORD style,
+                           EventFunction eventFunction,
+                           void *data);
 
     /// @brief Returns if the window passed is check (RADIOBUTTON and CHECKBOX)
-    /// @param window Window to check.
+    /// @param child Child window to check.
     /// @return True if checked. False if not.
-    bool buttonGetCheck(Window *window);
+    bool buttonGetCheck(Child *child);
 
     /// @brief Sets the window's check status (RADIOBUTTON and CHECKBOX).
-    /// @param window Window to set.
+    /// @param child Child window to check.
     /// @param check Status.
-    void buttonSetCheck(Window *window, bool check);
+    void buttonSetCheck(Child *child, bool check);
 
 #ifdef __cplusplus
 }

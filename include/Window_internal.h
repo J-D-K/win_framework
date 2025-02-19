@@ -2,6 +2,18 @@
 
 #ifdef __WINDOW_INTERNAL__
 #include "DynamicArray.h"
+// Child struct because they don't need all the the extra stuff a full window does.
+struct Child
+{
+    // Child handle.
+    HWND handle;
+    // Function to execute when an event occurs.
+    EventFunction eventFunction;
+    // Data pointer that is passed to ^
+    void *data;
+};
+
+
 // Text struct so the window can draw the text on WM_PAINT.
 typedef struct
 {
@@ -30,10 +42,6 @@ struct Window
     DynamicArray *children;
     // Array to hold text to draw to screen. Children do not have this.
     DynamicArray *text;
-    // Only Child windows use this and the void *
-    EventFunction eventFunction;
-    // Data passed to ^
-    void *data;
 };
 
 #endif

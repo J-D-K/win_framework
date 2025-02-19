@@ -3,21 +3,21 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Window *windowAddComboxBox(Window *window,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           DWORD style,
-                           EventFunction eventFunction,
-                           void *data)
+Child *windowAddComboxBox(Window *window,
+                          int x,
+                          int y,
+                          int width,
+                          int height,
+                          DWORD style,
+                          EventFunction eventFunction,
+                          void *data)
 {
     if (!window->children)
     {
         return NULL;
     }
 
-    Window *child = dynamicArrayNew(window->children);
+    Child *child = dynamicArrayNew(window->children);
     if (!child)
     {
         return NULL;
@@ -36,13 +36,6 @@ Window *windowAddComboxBox(Window *window,
                                    window->appHandle,
                                    NULL);
 
-    // NULL the rest for this.
-    child->appHandle = NULL;
-    child->context = NULL;
-    // This might need to be carried over.
-    child->font = window->font;
-    child->children = NULL;
-    child->text = NULL;
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
     child->data = data;
@@ -52,23 +45,23 @@ Window *windowAddComboxBox(Window *window,
     return child;
 }
 
-bool comboBoxAddString(Window *window, const char *string)
+bool comboBoxAddString(Child *child, const char *string)
 {
-    return SendMessage(window->handle, CB_ADDSTRING, 0, (LONG_PTR)string) != CB_ERR;
+    return SendMessage(child->handle, CB_ADDSTRING, 0, (LONG_PTR)string) != CB_ERR;
 }
 
-bool comboBoxDeleteString(Window *window, int index)
+bool comboBoxDeleteString(Child *child, int index)
 {
-    if (index < 0 || index >= comboBoxGetCount(window))
+    if (index < 0 || index >= comboBoxGetCount(child))
     {
         return false;
     }
 
-    return SendMessage(window->handle, CB_DELETESTRING, index, 0) != CB_ERR;
+    return SendMessage(child->handle, CB_DELETESTRING, index, 0) != CB_ERR;
 }
 
 
-int comboBoxGetCount(Window *window)
+int comboBoxGetCount(Child *child)
 {
-    return SendMessage(window->handle, CB_GETCOUNT, 0, 0);
+    return SendMessage(child->handle, CB_GETCOUNT, 0, 0);
 }

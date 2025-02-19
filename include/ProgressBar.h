@@ -15,33 +15,33 @@ extern "C"
     /// @param height Height.
     /// @param style Progress bar style.
     /// @return Progress bar window.
-    Window *windowAddProgressBar(Window *window, int x, int y, int width, int height, DWORD style);
+    Child *windowAddProgressBar(Window *window, int x, int y, int width, int height, DWORD style);
 
     /// @brief Sets the bar color of the progress bar passed.
     /// @param window Progress bar to set the color of.
     /// @param color Color to set to.
-    void progressBarSetBarColor(Window *window, COLORREF color);
+    void progressBarSetBarColor(Child *child, COLORREF color);
 
     /// @brief Sets the background color of the progress bar passed.
     /// @param window Progress bar to set the color of.
     /// @param color Color to set to.
-    void progressBarSetBackColor(Window *window, COLORREF color);
+    void progressBarSetBackColor(Child *child, COLORREF color);
 
     /// @brief Advances the position of the progress bar.
     /// @param window Progress bar to advance.
     /// @param advance Amount to advance bar.
-    void progressBarAdvance(Window *window, int advance);
+    void progressBarAdvance(Child *child, int advance);
 
     /// @brief Sets the position of the progress bar.
     /// @param window Progress bar to set the position of.
     /// @param position Position to set.
-    void progressBarSetPosition(Window *window, int position);
+    void progressBarSetPosition(Child *child, int position);
 
     /// @brief
     /// @param window
     /// @param minimum
     /// @param maximum
-    void progressBarSetRange(Window *window, int minimum, int maximum);
+    void progressBarSetRange(Child *child, int minimum, int maximum);
 
 #ifdef __cplusplus
 }

@@ -13,7 +13,9 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/Edit.c
                 ./source/main.c
                 ./source/ProgressBar.c
+                ./source/Tab.c
                 ./source/Window.c
+                ./source/windowProcFunc.c
                 ./source/resources.rc)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O2)

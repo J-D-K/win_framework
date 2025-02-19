@@ -14,6 +14,9 @@ extern "C"
     /// @brief Window struct.
     typedef struct Window Window;
 
+    /// @brief Child struct.
+    typedef struct Child Child;
+
     /// @brief Event function definition.
     typedef void (*EventFunction)(Window *, WPARAM, void *);
 
