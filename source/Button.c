@@ -30,6 +30,7 @@ Child *windowAddButton(Window *window,
     {
         TEXTMETRIC textMetrics;
         GetTextMetrics(window->context, &textMetrics);
+
         height = textMetrics.tmHeight + 4;
     }
 

@@ -2,6 +2,8 @@
 #include <commctrl.h>
 #include <string.h>
 
+#include "Window.h"
+
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
@@ -23,7 +25,7 @@ Child *windowAddTabControl(Window *window,
     child->handle = CreateWindowEx(0,
                                    WC_TABCONTROL,
                                    NULL,
-                                   WS_CHILD | WS_VISIBLE | style,
+                                   WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | style,
                                    x,
                                    y,
                                    width,

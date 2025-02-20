@@ -2,6 +2,7 @@
 #include "Button.h"
 #include "ComboBox.h"
 #include "Edit.h"
+#include "ListBox.h"
 #include "ProgressBar.h"
 #include "Tab.h"
 #include <stdbool.h>
@@ -9,6 +10,9 @@
 // This needs to be here. Seems to conflict with windows.h
 #include "Window_external.h"
 #include <commctrl.h>
+
+/// @brief This is the default style I use for creating the main window.
+static const int WINDOW_MAIN_DEFAULT_STYLE = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX;
 
 #ifdef __cplusplus
 extern "C"
@@ -19,16 +23,20 @@ extern "C"
     /// @param title Window title.
     /// @param width Width of the window.
     /// @param height Height of the window.
+    /// @param style Style of the window.
     /// @param windowColor Background color of window
-    /// @param handle Application handle.
+    /// @param parent Parent of the window. Pass NULL if creating the mainWindow.
+    /// @param appHandle Application handle.
     /// @return New window on success. NULL on failure.
     /// @note The window and all its children will automatically be freed when the message WM_QUIT is posted to it.
     Window *windowCreate(const char *windowClass,
                          const char *title,
                          int width,
                          int height,
+                         DWORD style,
                          COLORREF windowColor,
-                         HINSTANCE handle);
+                         Window *parent,
+                         HINSTANCE appHandle);
 
     /// @brief Loads and sets the big icon of the window.
     /// @param window Window to set the icon for.
@@ -54,6 +62,10 @@ extern "C"
     /// @brief Shows the window.
     /// @param window Window to show.
     void windowShow(Window *window);
+
+    /// @brief Hides the window.
+    /// @param window Window to hide.
+    void windowHide(Window *window);
 
     /// @brief Runs the update routine for the window.
     /// @param window Window to update and handle.

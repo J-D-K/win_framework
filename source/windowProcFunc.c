@@ -1,5 +1,8 @@
 #include "windowProcFunc.h"
+#include "Window.h"
 #include "Window_external.h"
+#include <commctrl.h>
+#include <stdio.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"

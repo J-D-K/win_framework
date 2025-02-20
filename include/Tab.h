@@ -31,6 +31,7 @@ extern "C"
     /// @param tabName Name of the tab.
     /// @param window Window to be displayed when the tab is clicked.
     /// @return True on success. False on failure.
+    /// @note The window passed to this needs to be created with WS_CHILD.
     bool tabControlAddTab(Child *child, int index, char *tabName, Window *window);
 
 #ifdef __cplusplus

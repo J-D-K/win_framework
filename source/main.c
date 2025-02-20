@@ -1,4 +1,5 @@
 #include "Window.h"
+#include <stdio.h>
 #include <string.h>
 
 // Window background color
@@ -27,9 +28,16 @@ void buttonClick(Window *window, WPARAM wParam, void *dataIn)
     MessageBox(windowGetHandle(window), inputBuffer, "Input Text", MB_ICONEXCLAMATION);
 }
 
-int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHInstance, char *commandline, int cmdShow)
+int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
-    Window *mainWindow = windowCreate("win_framework", "Main Window", 640, 480, WINDOW_BACKGROUND, handle);
+    Window *mainWindow = windowCreate("win_framework",
+                                      "Main Window",
+                                      640,
+                                      480,
+                                      WINDOW_MAIN_DEFAULT_STYLE,
+                                      WINDOW_BACKGROUND,
+                                      NULL,
+                                      appHandle);
     if (!mainWindow)
     {
         MessageBox(NULL, "Error creating main window.", "Error", MB_ICONERROR);
@@ -40,11 +48,14 @@ int WINAPI WinMain(HINSTANCE handle, HINSTANCE pHInstance, char *commandline, in
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    Child *tabControl = windowAddTabControl(mainWindow, 0, 0, 640, 480, TCS_FLATBUTTONS, NULL, NULL);
-    tabControlAddTab(tabControl, 0, "Tab A", NULL);
-    tabControlAddTab(tabControl, 1, "Tab B", NULL);
-    tabControlAddTab(tabControl, 2, "Tab C", NULL);
-    tabControlAddTab(tabControl, 3, "Tab D", NULL);
+    Child *listBox = windowAddListBox(mainWindow, 0, 0, 160, 240, LBS_NOTIFY | WS_VSCROLL, NULL, NULL);
+
+    for (size_t i = 0; i < 48; i++)
+    {
+        char nameBuffer[32];
+        snprintf(nameBuffer, 32, "%u", i);
+        listBoxAddString(listBox, nameBuffer);
+    }
 
     windowShow(mainWindow);
 

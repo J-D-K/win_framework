@@ -16,8 +16,10 @@ Window *windowCreate(const char *windowClass,
                      const char *title,
                      int width,
                      int height,
+                     DWORD style,
                      COLORREF windowColor,
-                     HINSTANCE handle)
+                     Window *parent,
+                     HINSTANCE appHandle)
 {
     // Try to allocate window first.
     Window *window = malloc(sizeof(Window));
@@ -35,7 +37,7 @@ Window *windowCreate(const char *windowClass,
                           .lpfnWndProc = windowProcFunc,
                           .cbClsExtra = 0,
                           .cbWndExtra = 0,
-                          .hInstance = handle,
+                          .hInstance = appHandle,
                           .hIcon = NULL,
                           .hCursor = NULL,
                           .hbrBackground = window->backgroundColor,
@@ -52,14 +54,14 @@ Window *windowCreate(const char *windowClass,
     window->handle = CreateWindowEx(0,
                                     windowClass,
                                     title,
-                                    WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX,
+                                    style,
                                     CW_USEDEFAULT,
                                     CW_USEDEFAULT,
                                     width,
                                     height,
+                                    parent == NULL ? NULL : parent->handle,
                                     NULL,
-                                    NULL,
-                                    handle,
+                                    appHandle,
                                     NULL);
     if (!window->handle)
     {
@@ -134,6 +136,12 @@ void windowSetTextColor(Window *window, COLORREF color)
 void windowShow(Window *window)
 {
     ShowWindow(window->handle, SW_NORMAL);
+    UpdateWindow(window->handle);
+}
+
+void windowHide(Window *window)
+{
+    ShowWindow(window->handle, SW_HIDE);
     UpdateWindow(window->handle);
 }
 

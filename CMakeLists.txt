@@ -11,6 +11,7 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/ComboBox.c
                 ./source/DynamicArray.c
                 ./source/Edit.c
+                ./source/ListBox.c
                 ./source/main.c
                 ./source/ProgressBar.c
                 ./source/Tab.c
