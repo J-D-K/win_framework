@@ -7,35 +7,33 @@ static const COLORREF WINDOW_BACKGROUND = RGB(0xBB, 0xBB, 0xBB);
 // Text color.
 static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 
-void buttonClick(Window *window, WPARAM wParam, void *dataIn)
+// Declarations here. Def's later.
+static void fileOpenClick(Window *window, WPARAM wParam, void *data)
 {
-    // This should get a pointer to the input.
-    Child *textInput = (Child *)dataIn;
-
-    // Get the length of the text.
-    int inputLength = editGetTextLength(textInput);
-    if (inputLength <= 0)
-    {
-        // Just bail. There's nothing to show.
-        return;
-    }
-
-    // Get the length. Add one, because I don't think Windows includes the null terminator.
-    char inputBuffer[inputLength + 1];
-    memset(inputBuffer, 0x00, inputLength + 1);
-    editGetText(textInput, inputBuffer, inputLength + 1);
-
-    MessageBox(windowGetHandle(window), inputBuffer, "Input Text", MB_ICONEXCLAMATION);
+    MessageBox(windowGetHandle(window), "Open Clicked!", "WEW", MB_ICONEXCLAMATION);
 }
 
 int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
+    // Creating menus goes reverse compared to how you'd think.
+    // File menu
+    Menu *fileMenu = menuCreate();
+    int openId = menuAddMenu(fileMenu, "Open", NULL);
+
+    // Main menu.
+    Menu *mainMenu = menuCreate();
+    menuAddMenu(mainMenu, "File", fileMenu);
+    menuAddMenu(mainMenu, "Edit", NULL);
+    menuAddMenu(mainMenu, "Settings", NULL);
+    menuAddMenu(mainMenu, "About", NULL);
+
     Window *mainWindow = windowCreate("win_framework",
                                       "Main Window",
                                       640,
                                       480,
                                       WINDOW_MAIN_DEFAULT_STYLE,
                                       WINDOW_BACKGROUND,
+                                      mainMenu,
                                       NULL,
                                       appHandle);
     if (!mainWindow)
@@ -44,18 +42,16 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
         return -1;
     }
 
+    // Setup menu stuff.
+    // Only gonna bother with one cause if it works, the rest should too.
+    windowAddMenuEvent(mainWindow, openId, fileOpenClick, NULL);
+
     // Set text crap.
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    Child *listBox = windowAddListBox(mainWindow, 0, 0, 160, 240, LBS_NOTIFY | WS_VSCROLL, NULL, NULL);
-
-    for (size_t i = 0; i < 48; i++)
-    {
-        char nameBuffer[32];
-        snprintf(nameBuffer, 32, "%u", i);
-        listBoxAddString(listBox, nameBuffer);
-    }
+    int y = 0;
+    Child *edit = windowAddEdit(mainWindow, 0, y, 224, AUTO_SIZE, ES_AUTOHSCROLL, NULL, NULL);
 
     windowShow(mainWindow);
 

@@ -2,6 +2,7 @@
 
 #ifdef __WINDOW_INTERNAL__
 #include "DynamicArray.h"
+
 // Child struct because they don't need all the the extra stuff a full window does.
 struct Child
 {
@@ -13,6 +14,16 @@ struct Child
     void *data;
 };
 
+// This is the struct for menu events. I wasn't sure how else to add them?
+typedef struct
+{
+    // The id of the menu with the event.
+    int id;
+    // Function to call.
+    EventFunction eventFunction;
+    // Data pointer.
+    void *data;
+} MenuEvent;
 
 // Text struct so the window can draw the text on WM_PAINT.
 typedef struct
@@ -38,8 +49,10 @@ struct Window
     HBRUSH backgroundColor;
     // Text color.
     COLORREF textColor;
-    // Dynamic array to hold children. Both the main and children have this.
+    // Dynamic array to hold children.
     DynamicArray *children;
+    // Dynamic array to hold menu events.
+    DynamicArray *menuEvents;
     // Array to hold text to draw to screen. Children do not have this.
     DynamicArray *text;
 };

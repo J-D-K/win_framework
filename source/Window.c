@@ -7,6 +7,7 @@
 #include <string.h>
 
 #define __WINDOW_INTERNAL__
+#include "Menu_internal.h"
 #include "Window_internal.h"
 
 // Declarations. Definitions at bottom of the file.
@@ -18,6 +19,7 @@ Window *windowCreate(const char *windowClass,
                      int height,
                      DWORD style,
                      COLORREF windowColor,
+                     Menu *menu,
                      Window *parent,
                      HINSTANCE appHandle)
 {
@@ -60,7 +62,7 @@ Window *windowCreate(const char *windowClass,
                                     width,
                                     height,
                                     parent == NULL ? NULL : parent->handle,
-                                    NULL,
+                                    menu == NULL ? NULL : menu->menu,
                                     appHandle,
                                     NULL);
     if (!window->handle)
@@ -75,11 +77,17 @@ Window *windowCreate(const char *windowClass,
     // Set the pointer for this window handle to pass the window struct.
     SetWindowLongPtr(window->handle, GWLP_USERDATA, (LONG_PTR)window);
 
-    // Allocate child and text arrays.
+    // Allocate child, menu events, and text.
     window->children = dynamicArrayCreate(sizeof(Child), NULL);
+    window->menuEvents = dynamicArrayCreate(sizeof(MenuEvent), NULL);
     window->text = dynamicArrayCreate(sizeof(Text), textDestroy);
 
     return window;
+}
+
+void windowClose(Window *window)
+{
+    SendMessage(window->handle, WM_CLOSE, 0, 0);
 }
 
 void windowSetBigIcon(Window *window, int resource)
@@ -139,42 +147,46 @@ void windowShow(Window *window)
     UpdateWindow(window->handle);
 }
 
-void windowHide(Window *window)
-{
-    ShowWindow(window->handle, SW_HIDE);
-    UpdateWindow(window->handle);
-}
-
 bool windowUpdate(Window *window)
 {
+    // Message count
+    int messageCount = 0;
     // Message
     MSG message;
-    // Record this.
-    int messageCount = GetMessage(&message, window->handle, 0, 0);
-    TranslateMessage(&message);
-    DispatchMessage(&message);
-    // Return this so we know if the window is still open.
+    while ((messageCount = GetMessage(&message, window->handle, 0, 0)) > 0)
+    {
+        TranslateMessage(&message);
+        DispatchMessage(&message);
+    }
     return messageCount > 0;
 }
 
-void windowAddText(Window *window, int x, int y, const char *text)
+bool windowAddText(Window *window, int x, int y, const char *text)
 {
     // Need this check so children can't be passed here.
     if (!window->text)
     {
-        return;
+        return false;
     }
 
     // Allocate a new text struct.
     Text *newText = dynamicArrayNew(window->text);
     if (!newText)
     {
-        return;
+        return false;
     }
 
     // Get string length and allocate buffer for it.
     size_t textLength = strlen(text);
     newText->text = malloc(textLength + 1);
+    if (!newText->text)
+    {
+        // Erase the back.
+        dynamicArrayErase(window->text, dynamicArrayGetSize(window->text) - 1);
+        return false;
+    }
+
+    // Clear the text.
     memset(newText->text, 0x00, textLength + 1);
 
     // Copy the incoming text to it.
@@ -186,11 +198,34 @@ void windowAddText(Window *window, int x, int y, const char *text)
     // Record X and Y.
     newText->x = x;
     newText->y = y;
+
+    return true;
+}
+
+bool windowAddMenuEvent(Window *window, int menuId, EventFunction eventFunction, void *data)
+{
+    // Create a new event
+    MenuEvent *menuEvent = dynamicArrayNew(window->menuEvents);
+    if (!menuEvent)
+    {
+        return false;
+    }
+    // Set shit
+    menuEvent->id = menuId;
+    menuEvent->eventFunction = eventFunction;
+    menuEvent->data = data;
+
+    return true;
 }
 
 HWND windowGetHandle(Window *window)
 {
     return window->handle;
+}
+
+HBRUSH windowGetBackground(Window *window)
+{
+    return window->backgroundColor;
 }
 
 // Function to free and destroy text structs;

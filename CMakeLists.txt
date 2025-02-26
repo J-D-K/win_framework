@@ -13,6 +13,7 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/Edit.c
                 ./source/ListBox.c
                 ./source/main.c
+                ./source/Menu.c
                 ./source/ProgressBar.c
                 ./source/Tab.c
                 ./source/Window.c
@@ -20,5 +21,5 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/resources.rc)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O2)
-target_link_options(${PROJECT_NAME} PRIVATE -s -static-libgcc -static)
+target_link_options(${PROJECT_NAME} PRIVATE -s -mwindows -static-libgcc -static)
 target_link_libraries(${PROJECT_NAME} PRIVATE -lgdi32 -lcomctl32)
