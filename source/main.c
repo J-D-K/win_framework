@@ -59,5 +59,8 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     {
     }
     // Window automatically destroys itself when the WM_CLOSE command is received.
+    // But these don't? Not sure.
+    menuDestroy(fileMenu);
+    menuDestroy(mainMenu);
     return 0;
 }
