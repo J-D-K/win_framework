@@ -6,6 +6,7 @@
 #include "Menu.h"
 #include "ProgressBar.h"
 #include "Tab.h"
+#include "filename.h"
 #include <stdbool.h>
 #include <windows.h>
 // This needs to be here. Seems to conflict with windows.h
