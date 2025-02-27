@@ -23,7 +23,7 @@ Child *windowAddTabControl(Window *window,
     }
 
     child->handle = CreateWindowEx(0,
-                                   WC_TABCONTROL,
+                                   WC_TABCONTROLA,
                                    NULL,
                                    WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | style,
                                    x,

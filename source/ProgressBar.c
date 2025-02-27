@@ -1,5 +1,5 @@
 #include "ProgressBar.h"
-#include <uxtheme.h>
+#include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
@@ -18,7 +18,7 @@ Child *windowAddProgressBar(Window *window, int x, int y, int width, int height,
     }
 
     child->handle = CreateWindowEx(0,
-                                   PROGRESS_CLASS,
+                                   PROGRESS_CLASSA,
                                    NULL,
                                    WS_CHILD | WS_VISIBLE | style,
                                    x,

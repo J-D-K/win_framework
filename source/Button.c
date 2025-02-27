@@ -1,4 +1,5 @@
 #include "Button.h"
+#include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
@@ -36,7 +37,7 @@ Child *windowAddButton(Window *window,
 
     // Create the button.
     child->handle = CreateWindowEx(0,
-                                   "BUTTON",
+                                   WC_BUTTONA,
                                    buttonText,
                                    WS_CHILD | WS_VISIBLE | style,
                                    x,

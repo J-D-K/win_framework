@@ -1,4 +1,5 @@
 #include "Edit.h"
+#include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
@@ -34,12 +35,19 @@ Child *windowAddEdit(Window *window,
         height = textMetrics.tmHeight + 4;
     }
 
-    // Style.
-    DWORD dwStyle = WS_CHILD | WS_BORDER | WS_VISIBLE | style;
-
     // Create a single lined edit input.
-    child->handle =
-        CreateWindowEx(0, "EDIT", NULL, dwStyle, x, y, width, height, window->handle, NULL, window->appHandle, NULL);
+    child->handle = CreateWindowEx(0,
+                                   WC_EDITA,
+                                   NULL,
+                                   WS_CHILD | WS_BORDER | WS_VISIBLE | style,
+                                   x,
+                                   y,
+                                   width,
+                                   height,
+                                   window->handle,
+                                   NULL,
+                                   window->appHandle,
+                                   NULL);
 
     // Make sure we set the function and ID.
     child->eventFunction = eventFunction;
