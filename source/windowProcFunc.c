@@ -7,18 +7,12 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-// This enum is so the WM_COMMAND switch case is easier to understand.
-enum
-{
-    MENU,
-    ACCELERATOR,
-    CONTROL
-};
-
 // This are declared and defined here, because it is called when the WM_CLOSE message is received.
 static void windowDestroy(void *windowIn);
+// This handles menu events
+static LRESULT handleMenuEvents(Window *window, WPARAM wParam, LPARAM lParam);
 // This executes the eventFunction associated with the handle.
-static LRESULT handleEventFromControl(Window *window, WPARAM wParam, HWND controlHandle);
+static LRESULT handleControlEvents(Window *window, WPARAM wParam, LPARAM lParam);
 
 LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -37,45 +31,14 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_COMMAND:
         {
-            // wParam is checked to see what the command is coming from.
-            switch (HIWORD(wParam))
+            // This is the only real way to be sure it's a menu event?
+            if (HIWORD(wParam) == 0 && (HWND)lParam == NULL)
             {
-                case MENU:
-                {
-                    // Get the ID of the menu that sent the message.
-                    int menuId = LOWORD(wParam);
-
-                    // Grab the size of the array.
-                    size_t menuEventSize = dynamicArrayGetSize(window->menuEvents);
-                    for (size_t i = 0; i < menuEventSize; i++)
-                    {
-                        MenuEvent *event = dynamicArrayGet(window->menuEvents, i);
-                        // Don't pay attention to this.
-                        if (event->id != menuId)
-                        {
-                            continue;
-                        }
-                        else if (event->id == menuId && event->eventFunction)
-                        {
-                            (*event->eventFunction)(window, wParam, event->data);
-                            break;
-                        }
-                    }
-                    return 0;
-                }
-                break;
-
-                case ACCELERATOR:
-                {
-                    return 0;
-                }
-                break;
-
-                case CONTROL:
-                {
-                    return handleEventFromControl(window, wParam, (HWND)lParam);
-                }
-                break;
+                return handleMenuEvents(window, wParam, lParam);
+            }
+            else // This will also trigger with accelerators. Dunno if that's bad or not yet.
+            {
+                return handleControlEvents(window, wParam, lParam);
             }
         }
         break;
@@ -157,7 +120,33 @@ static void windowDestroy(void *windowIn)
     free(window);
 }
 
-static LRESULT handleEventFromControl(Window *window, WPARAM wParam, HWND controlHandle)
+static LRESULT handleMenuEvents(Window *window, WPARAM wParam, LPARAM lParam)
+{
+    if (!window || !window->menuEvents)
+    {
+        return 0;
+    }
+
+    // Get menu event count.
+    int events = dynamicArrayGetSize(window->menuEvents);
+
+    for (int i = 0; i < events; i++)
+    {
+        // Grab the current
+        MenuEvent *event = dynamicArrayGet(window->menuEvents, i);
+        if (!event || event->id != LOWORD(wParam))
+        {
+            continue;
+        }
+        else if (event->eventFunction)
+        {
+            (*event->eventFunction)(window, wParam, lParam, event->data);
+        }
+    }
+    return 0;
+}
+
+static LRESULT handleControlEvents(Window *window, WPARAM wParam, LPARAM lParam)
 {
     if (!window || !window->children)
     {
@@ -175,10 +164,10 @@ static LRESULT handleEventFromControl(Window *window, WPARAM wParam, HWND contro
         {
             continue;
         }
-        else if (child->handle == controlHandle && child->eventFunction) // Double check the function before segfault.
+        else if (child->handle == (HWND)lParam && child->eventFunction) // Double check the function before segfault.
         {
             // Execute the function and break the loop.
-            (*child->eventFunction)(window, wParam, child->data);
+            (*child->eventFunction)(window, wParam, lParam, child->data);
             break;
         }
     }

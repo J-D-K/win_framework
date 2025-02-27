@@ -11,7 +11,7 @@ struct DynamicArray
     // Size of the elements being added.
     size_t elementSize;
     // Size/length of the array.
-    size_t size;
+    int size;
     // Function used to free the memory in the array.
     ElementFreeFunction freeFunction;
 };
@@ -65,7 +65,7 @@ void dynamicArrayDestroy(DynamicArray *array)
     array = NULL;
 }
 
-size_t dynamicArrayGetSize(DynamicArray *array)
+int dynamicArrayGetSize(DynamicArray *array)
 {
     return array->size;
 }

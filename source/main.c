@@ -9,7 +9,7 @@ static const COLORREF WINDOW_BACKGROUND = RGB(0xBB, 0xBB, 0xBB);
 static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 
 // Declarations here. Def's later.
-static void fileOpenClick(Window *window, WPARAM wParam, void *data)
+static void fileOpenClick(Window *window, WPARAM wParam, LPARAM lParam, void *data)
 {
     // Buffer for file name.
     char fileBuffer[256] = {0};

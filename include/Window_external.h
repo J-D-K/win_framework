@@ -18,7 +18,7 @@ extern "C"
     typedef struct Child Child;
 
     /// @brief Event function definition.
-    typedef void (*EventFunction)(Window *, WPARAM, void *);
+    typedef void (*EventFunction)(Window *, WPARAM, LPARAM, void *);
 
 #ifdef __cplusplus
 }

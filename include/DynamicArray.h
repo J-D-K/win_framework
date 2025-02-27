@@ -20,7 +20,7 @@ void dynamicArrayDestroy(DynamicArray *array);
 /// @brief Returns the current size of the array.
 /// @param array Array to get the size of.
 /// @return Number of elements currently in the array.
-size_t dynamicArrayGetSize(DynamicArray *array);
+int dynamicArrayGetSize(DynamicArray *array);
 
 /// @brief Allocates a new element in the array.
 /// @param array Array to allocate new with.
