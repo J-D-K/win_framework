@@ -76,6 +76,7 @@ extern "C"
     /// @param child Listbox to clear.
     /// @return True on success. False on failure.
     bool listBoxClear(Child *child);
+
 #ifdef __cplusplus
 }
 #endif

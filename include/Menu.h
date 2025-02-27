@@ -23,6 +23,7 @@ extern "C"
     /// @brief Adds a divider to the menu.
     /// @param menu Menu to add divider to.
     void menuAddSeparator(Menu *menu);
+
 #ifdef __cplusplus
 }
 #endif

@@ -67,6 +67,7 @@ extern "C"
     /// @param bufferSize
     /// @return
     bool comboBoxGetString(Child *child, int index, char *buffer, size_t bufferSize);
+
 #ifdef __cplusplus
 }
 #endif

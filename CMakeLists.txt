@@ -23,5 +23,8 @@ target_sources(${PROJECT_NAME} PRIVATE
                 ./source/resources.rc)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -O2)
+# Debugging build that can print to console. To do: This right
+# target_link_options(${PROJECT_NAME} PRIVATE -s -mwindows -static-libgcc -static)
+# Release that doesn't need the console.
 target_link_options(${PROJECT_NAME} PRIVATE -s -mwindows -static-libgcc -static)
 target_link_libraries(${PROJECT_NAME} PRIVATE -lcomdlg32 -lgdi32 -lcomctl32)

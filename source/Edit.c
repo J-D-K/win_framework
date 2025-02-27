@@ -61,18 +61,20 @@ Child *windowAddEdit(Window *window,
 
 int editGetTextLength(Child *child)
 {
-    return SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0);
+    // One is added because Windows doesn't count the NULL terminator.
+    return SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0) + 1;
 }
 
 bool editGetText(Child *child, char *buffer, size_t bufferSize)
 {
     // Get the length first before continuing.
     size_t textLength = SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0);
-    if (textLength + 1 > bufferSize)
+    if (textLength > bufferSize)
     {
         return false;
     }
-    return SendMessage(child->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength;
+    // One is subtracted to account for the NULL terminator, which Windows doesn't count?
+    return SendMessage(child->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength - 1;
 }
 
 bool editSetText(Child *child, const char *text)
