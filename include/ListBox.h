@@ -30,6 +30,11 @@ extern "C"
     /// @param string String to add to the list box.
     bool listBoxAddString(Child *child, const char *string);
 
+    /// @brief Gets the number of strings currently in the list box.
+    /// @param child Listbox to get count for.
+    /// @return Number of strings in the listbox.
+    int listBoxGetCount(Child *child);
+
     /// @brief Gets the index of the currently selected item.
     /// @param child List box to get the selected index of.
     /// @return Selected index.
@@ -60,6 +65,17 @@ extern "C"
     /// @param bufferSize Size of buffer.
     /// @return True on success. False on failure.
     bool listBoxGetText(Child *child, int index, char *buffer, size_t bufferSize);
+
+    /// @brief Deletes the string at index.
+    /// @param child Listbox to delete a string from.
+    /// @param index The index of the string to delete.
+    /// @return True on success. False on error.
+    bool listBoxDeleteString(Child *child, int index);
+
+    /// @brief Shortcut function to clear the list box.
+    /// @param child Listbox to clear.
+    /// @return True on success. False on failure.
+    bool listBoxClear(Child *child);
 #ifdef __cplusplus
 }
 #endif
