@@ -53,6 +53,8 @@ struct Window
     DynamicArray *children;
     // Dynamic array to hold menu events.
     DynamicArray *menuEvents;
+    // Dynamic array to hold tab windows.
+    DynamicArray *tabWindows;
     // Array to hold text to draw to screen. Children do not have this.
     DynamicArray *text;
 };

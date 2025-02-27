@@ -28,11 +28,10 @@ extern "C"
     /// @brief Adds a tab to a tab control.
     /// @param child Tab control to add the new tab to.
     /// @param index Index or place to add tab.
-    /// @param tabName Name of the tab.
-    /// @param window Window to be displayed when the tab is clicked.
-    /// @return True on success. False on failure.
+    /// @param tabTitle Name of the tab.
+    /// @return Internal ID on success. -1 on failure.
     /// @note The window passed to this needs to be created with WS_CHILD.
-    bool tabControlAddTab(Child *child, int index, char *tabName, Window *window);
+    int tabControlAddTab(Child *child, int index, char *tabTitle);
 
 #ifdef __cplusplus
 }

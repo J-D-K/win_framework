@@ -15,6 +15,8 @@ static void textDestroy(void *text);
 
 Window *windowCreate(const char *windowClass,
                      const char *title,
+                     int x,
+                     int y,
                      int width,
                      int height,
                      DWORD style,
@@ -52,13 +54,24 @@ Window *windowCreate(const char *windowClass,
         return NULL;
     }
 
+    // Check if we need to center the window.
+    if (x == WINDOW_CENTER)
+    {
+        x = (displayGetWidth() / 2) - (width / 2);
+    }
+
+    if (y == WINDOW_CENTER)
+    {
+        y = (displayGetHeight() / 2) - (height / 2);
+    }
+
     // Create window.
     window->handle = CreateWindowEx(0,
                                     windowClass,
                                     title,
                                     style,
-                                    CW_USEDEFAULT,
-                                    CW_USEDEFAULT,
+                                    x,
+                                    y,
                                     width,
                                     height,
                                     parent == NULL ? NULL : parent->handle,
@@ -80,6 +93,7 @@ Window *windowCreate(const char *windowClass,
     // Allocate child, menu events, and text.
     window->children = dynamicArrayCreate(sizeof(Child), NULL);
     window->menuEvents = dynamicArrayCreate(sizeof(MenuEvent), NULL);
+    window->tabWindows = dynamicArrayCreate(sizeof(Window *), NULL);
     window->text = dynamicArrayCreate(sizeof(Text), textDestroy);
 
     return window;

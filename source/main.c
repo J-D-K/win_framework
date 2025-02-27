@@ -4,7 +4,9 @@
 #include <string.h>
 
 // Window background color
-static const COLORREF WINDOW_BACKGROUND = RGB(0xCC, 0xCC, 0xCC);
+static const COLORREF WINDOW_BACKGROUND = RGB(0xF0, 0xF0, 0xF0);
+// White for tab background.
+static const COLORREF TAB_BACKGROUND = RGB(0xFF, 0xFF, 0xFF);
 // Text color.
 static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 
@@ -24,6 +26,8 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
 
     Window *mainWindow = windowCreate("win_framework",
                                       "Main Window",
+                                      WINDOW_CENTER,
+                                      WINDOW_CENTER,
                                       640,
                                       480,
                                       WINDOW_MAIN_DEFAULT_STYLE,
@@ -39,7 +43,6 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     // Set text crap.
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
-
 
     windowShow(mainWindow);
 

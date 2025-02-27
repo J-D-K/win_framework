@@ -2,8 +2,6 @@
 #include <commctrl.h>
 #include <string.h>
 
-#include "Window.h"
-
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
@@ -47,15 +45,23 @@ Child *windowAddTabControl(Window *window,
     return child;
 }
 
-bool tabControlAddTab(Child *child, int index, char *tabName, Window *window)
+int tabControlAddTab(Child *child, int index, char *tabTitle)
 {
+    // Internal tab id.
+    static int tabId = 0;
+
+    // This uses the internal index.
     TCITEM tab = {.mask = TCIF_TEXT,
                   .dwState = 0,
                   .dwStateMask = 0,
-                  .pszText = tabName,
-                  .cchTextMax = strlen(tabName),
+                  .pszText = tabTitle,
+                  .cchTextMax = strlen(tabTitle),
                   .iImage = -1,
-                  .lParam = (LONG_PTR)window};
+                  .lParam = tabId};
 
-    return SendMessage(child->handle, TCM_INSERTITEM, index, (LONG_PTR)&tab) != -1;
+    if (SendMessage(child->handle, TCM_INSERTITEM, index, (LONG_PTR)&tab) == -1)
+    {
+        return -1;
+    }
+    return tabId++;
 }

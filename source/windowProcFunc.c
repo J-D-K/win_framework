@@ -31,6 +31,8 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_COMMAND:
         {
+            printf("WM_COMMAND\n");
+
             // This is the only real way to be sure it's a menu event?
             if (HIWORD(wParam) == 0 && (HWND)lParam == NULL)
             {
@@ -61,6 +63,12 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
                 SetBkMode((HDC)wParam, TRANSPARENT);
                 return (LRESULT)window->backgroundColor;
             }
+        }
+        break;
+
+        case WM_NOTIFY:
+        {
+            printf("WM_NOTIFY\n");
         }
         break;
 
@@ -111,6 +119,7 @@ static void windowDestroy(void *windowIn)
     // Free children and text.
     dynamicArrayDestroy(window->children);
     dynamicArrayDestroy(window->menuEvents);
+    dynamicArrayDestroy(window->tabWindows);
     dynamicArrayDestroy(window->text);
     // Release the device context.
     ReleaseDC(window->handle, window->context);

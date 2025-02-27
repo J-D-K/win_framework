@@ -6,6 +6,7 @@
 #include "Menu.h"
 #include "ProgressBar.h"
 #include "Tab.h"
+#include "display.h"
 #include "filename.h"
 #include <stdbool.h>
 #include <windows.h>
@@ -14,6 +15,8 @@
 #include "Window_external.h"
 #include <commctrl.h>
 
+/// @brief Used to center the main window.
+static const int WINDOW_CENTER = -1;
 /// @brief This is the default style I use for creating the main window.
 static const int WINDOW_MAIN_DEFAULT_STYLE = WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME ^ WS_MAXIMIZEBOX;
 
@@ -24,6 +27,8 @@ extern "C"
     /// @brief Creates a new window.
     /// @param windowClass Window class.
     /// @param title Window title.
+    /// @param x X position of window.
+    /// @param y Y position of window.
     /// @param width Width of the window.
     /// @param height Height of the window.
     /// @param style Style of the window.
@@ -35,6 +40,8 @@ extern "C"
     /// @note The window and all its children will automatically be freed when the message WM_QUIT is posted to it.
     Window *windowCreate(const char *windowClass,
                          const char *title,
+                         int x,
+                         int y,
                          int width,
                          int height,
                          DWORD style,
