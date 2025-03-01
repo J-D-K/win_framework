@@ -1,18 +1,12 @@
 #include "Tab.h"
+#include "Child.h"
 #include <commctrl.h>
 #include <string.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Child *windowAddTabControl(Window *window,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           DWORD style,
-                           EventFunction eventFunction,
-                           void *data)
+Child *windowAddTabControl(Window *window, int x, int y, int width, int height, DWORD style)
 {
     Child *child = dynamicArrayNew(window->children);
     if (!child)
@@ -37,8 +31,7 @@ Child *windowAddTabControl(Window *window,
         return NULL;
     }
 
-    child->eventFunction = eventFunction;
-    child->data = data;
+    childInitFunctionsDefault(child);
 
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, 0);
 

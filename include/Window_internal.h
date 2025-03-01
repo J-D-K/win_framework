@@ -9,9 +9,13 @@ struct Child
     // Child handle.
     HWND handle;
     // Function to execute when an event occurs.
-    EventFunction eventFunction;
+    EventFunction commandFunction;
     // Data pointer that is passed to ^
-    void *data;
+    void *commandData;
+    // Function for when WM_NOTIFY is processed.
+    EventFunction notifyFunction;
+    // Data pointer for notify.
+    void *notifyData;
 };
 
 // This is the struct for menu events. I wasn't sure how else to add them?
@@ -19,9 +23,9 @@ typedef struct
 {
     // The id of the menu with the event.
     int id;
-    // Function to call.
+    // Function to call when WM_COMMAND is processed.
     EventFunction eventFunction;
-    // Data pointer.
+    // Data pointer for command function.
     void *data;
 } MenuEvent;
 

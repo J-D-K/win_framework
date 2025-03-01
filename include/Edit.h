@@ -2,7 +2,6 @@
 #include "Window_external.h"
 
 // This header contains all functions related to edit controls.
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -16,14 +15,7 @@ extern "C"
     /// @param style Style of EDIT control.
     /// @param eventFunction Function that is called for an event.
     /// @return Handle of the window/child on success. NULL on failure.
-    Child *windowAddEdit(Window *window,
-                         int x,
-                         int y,
-                         int width,
-                         int height,
-                         DWORD style,
-                         EventFunction eventFunction,
-                         void *data);
+    Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD style);
 
     /// @brief Gets the length of the text in the edit control.
     /// @param window Edit to get the length of.

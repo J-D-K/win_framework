@@ -1,5 +1,6 @@
 #include "Window.h"
 #include "DynamicArray.h"
+#include "display.h"
 #include "windowProcFunc.h"
 #include <malloc.h>
 #include <stdarg.h>

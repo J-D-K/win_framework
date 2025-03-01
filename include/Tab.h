@@ -1,6 +1,8 @@
 #pragma once
 #include "Window_external.h"
 
+// Functions related to tab controls.
+// HUGE NOTE AND TO DO: Figure out how the hell I want/need this to work.
 #ifdef __cplusplus
 extern "C"
 {
@@ -16,14 +18,7 @@ extern "C"
     /// @param eventFunction Function executed when an even occurs.
     /// @param data Data passed to ^.
     /// @return Child window on success. NULL on failure.
-    Child *windowAddTabControl(Window *window,
-                               int x,
-                               int y,
-                               int width,
-                               int height,
-                               DWORD style,
-                               EventFunction eventFunction,
-                               void *data);
+    Child *windowAddTabControl(Window *window, int x, int y, int width, int height, DWORD style);
 
     /// @brief Adds a tab to a tab control.
     /// @param child Tab control to add the new tab to.

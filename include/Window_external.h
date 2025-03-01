@@ -3,7 +3,6 @@
 #include <windows.h>
 
 // This file contains definitions all headers and source files need.
-
 #ifdef __cplusplus
 extern "C"
 {

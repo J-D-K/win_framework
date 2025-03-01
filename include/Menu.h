@@ -1,6 +1,8 @@
 #pragma once
 #include "Menu_external.h"
 
+// End-user facing functions for dealing with menus.
+// windowAddMenuEvent should be used to add functionality to menus based upon the return value of menuAddMenu.
 #ifdef __cplusplus
 extern "C"
 {

@@ -18,20 +18,22 @@ extern "C"
     /// @param style Style of button to use.
     /// @param eventFunction Function to execute on button triggering and event.
     /// @return Handle of the window/child on success. NULL on failure.
-    Child *windowAddButton(Window *window,
-                           int x,
-                           int y,
-                           int width,
-                           int height,
-                           const char *buttonText,
-                           DWORD style,
-                           EventFunction eventFunction,
-                           void *data);
+    Child *windowAddButton(Window *window, int x, int y, int width, int height, const char *buttonText, DWORD style);
 
     /// @brief Sets the ideal size of a button according to Windows.
     /// @param child Button to set the size for.
     /// @return True on success. False on failure.
     bool buttonSetIdealSize(Child *child);
+
+    /// @brief Returns the width of the button.
+    /// @param child Button to get the width of.
+    /// @return Width of the button.
+    int buttonGetWidth(Child *child);
+
+    /// @brief Returns the height of the button.
+    /// @param child Button to get the height of.
+    /// @return Height of the button.
+    int buttonGetHeight(Child *child);
 
     /// @brief Returns if the window passed is check (RADIOBUTTON and CHECKBOX)
     /// @param child Child window to check.

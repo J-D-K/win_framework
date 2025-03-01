@@ -1,17 +1,11 @@
 #include "ListBox.h"
+#include "Child.h"
 #include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Child *windowAddListBox(Window *window,
-                        int x,
-                        int y,
-                        int width,
-                        int height,
-                        DWORD style,
-                        EventFunction eventFunction,
-                        void *data)
+Child *windowAddListBox(Window *window, int x, int y, int width, int height, DWORD style)
 {
     Child *child = dynamicArrayNew(window->children);
     if (!child)
@@ -47,9 +41,7 @@ Child *windowAddListBox(Window *window,
     // Set the font to match the window.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, 0);
 
-    // Save these.
-    child->eventFunction = eventFunction;
-    child->data = data;
+    childInitFunctionsDefault(child);
 
     return child;
 }

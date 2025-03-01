@@ -168,14 +168,14 @@ static LRESULT handleControlEvents(Window *window, WPARAM wParam, LPARAM lParam)
     for (size_t i = 0; i < childrenCount; i++)
     {
         Child *child = dynamicArrayGet(window->children, i);
-        if (!child || !child->eventFunction)
+        if (!child || !child->commandFunction)
         {
             continue;
         }
-        else if (child->handle == (HWND)lParam && child->eventFunction) // Double check the function before segfault.
+        else if (child->handle == (HWND)lParam && child->commandFunction) // Double check the function before segfault.
         {
             // Execute the function and break the loop.
-            (*child->eventFunction)(window, wParam, lParam, child->data);
+            (*child->commandFunction)(window, wParam, lParam, child->commandData);
             break;
         }
     }

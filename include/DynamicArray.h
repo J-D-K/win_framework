@@ -1,6 +1,9 @@
 #pragma once
 #include <stddef.h>
 
+// This file contains all functions for the sort of dynamic array I wrote since I have no way of knowing how
+// large or small one is going to be.
+
 /// @brief Function pointer for freeing elements.
 typedef void (*ElementFreeFunction)(void *);
 

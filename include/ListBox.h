@@ -1,6 +1,7 @@
 #pragma once
 #include "Window_external.h"
 
+// Contains functions related to using list boxes.
 #ifdef __cplusplus
 extern "C"
 {
@@ -16,14 +17,7 @@ extern "C"
     /// @param eventFunction Function that is executed when an event occurs.
     /// @param data Pointer that is passed to ^.
     /// @return
-    Child *windowAddListBox(Window *window,
-                            int x,
-                            int y,
-                            int width,
-                            int height,
-                            DWORD style,
-                            EventFunction eventFunction,
-                            void *data);
+    Child *windowAddListBox(Window *window, int x, int y, int width, int height, DWORD style);
 
     /// @brief Adds a string to the listbox.
     /// @param child Listbox to add the string to.

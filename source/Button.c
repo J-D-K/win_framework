@@ -1,18 +1,11 @@
 #include "Button.h"
+#include "Child.h"
 #include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Child *windowAddButton(Window *window,
-                       int x,
-                       int y,
-                       int width,
-                       int height,
-                       const char *buttonText,
-                       DWORD style,
-                       EventFunction eventFunction,
-                       void *data)
+Child *windowAddButton(Window *window, int x, int y, int width, int height, const char *buttonText, DWORD style)
 {
     // Children check
     if (!window->children)
@@ -54,13 +47,34 @@ Child *windowAddButton(Window *window,
         return NULL;
     }
 
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
+    childInitFunctionsDefault(child);
 
-    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
+    SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, 0);
 
     return child;
+}
+
+int buttonGetWidth(Child *child)
+{
+    // Rect to get coords.
+    RECT buttonRect = {0};
+
+    if (GetWindowRect(child->handle, &buttonRect) == FALSE)
+    {
+        return -1;
+    }
+    return buttonRect.right - buttonRect.left;
+}
+
+int buttonGetHeight(Child *child)
+{
+    RECT buttonRect = {0};
+
+    if (GetWindowRect(child->handle, &buttonRect) == FALSE)
+    {
+        return -1;
+    }
+    return buttonRect.bottom - buttonRect.top;
 }
 
 bool buttonSetIdealSize(Child *child)

@@ -1,18 +1,9 @@
 #pragma once
-#include "Button.h"
-#include "ComboBox.h"
-#include "Edit.h"
-#include "ListBox.h"
-#include "Menu.h"
-#include "ProgressBar.h"
-#include "Tab.h"
-#include "display.h"
-#include "filename.h"
-#include <stdbool.h>
-#include <windows.h>
-// This needs to be here. Seems to conflict with windows.h
 #include "Menu_external.h"
 #include "Window_external.h"
+#include <stdbool.h>
+#include <windows.h>
+// This needs to be here. Seems to conflict with windows.h?
 #include <commctrl.h>
 
 /// @brief Used to center the main window.

@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "win_framework.h"
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
@@ -9,6 +9,19 @@ static const COLORREF WINDOW_BACKGROUND = RGB(0xF0, 0xF0, 0xF0);
 static const COLORREF TAB_BACKGROUND = RGB(0xFF, 0xFF, 0xFF);
 // Text color.
 static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
+
+static void buttonFunction(Window *window, WPARAM wParam, LPARAM lParam, void *dataIn)
+{
+    MessageBox(windowGetHandle(window), "Button clicked.", "WOOOO", MB_ICONEXCLAMATION);
+}
+
+static void fileOpenFunction(Window *window, WPARAM wParam, LPARAM lParam, void *dataIn)
+{
+    MessageBox(windowGetHandle(window),
+               "This is where a file dialog would be if I felt like adding it right now.",
+               "Laziness kicked in.",
+               MB_ICONERROR);
+}
 
 int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
@@ -44,9 +57,11 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    // This is to test and see if the set ideal works.
-    Child *testButton = windowAddButton(mainWindow, 8, 32, 0, 0, "Test Button", BS_CENTER, NULL, NULL);
+    Child *testButton = windowAddButton(mainWindow, 8, 24, 0, 0, "Click this.", BS_CENTER);
     buttonSetIdealSize(testButton);
+
+    windowAddMenuEvent(mainWindow, openId, fileOpenFunction, NULL);
+    childSetCommandFunction(testButton, buttonFunction, NULL);
 
     windowShow(mainWindow);
 

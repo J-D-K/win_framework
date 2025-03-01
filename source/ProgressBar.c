@@ -1,4 +1,5 @@
 #include "ProgressBar.h"
+#include "Child.h"
 #include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
@@ -30,9 +31,7 @@ Child *windowAddProgressBar(Window *window, int x, int y, int width, int height,
                                    window->appHandle,
                                    NULL);
 
-    // NULL the rest for this.
-    child->eventFunction = NULL;
-    child->data = NULL;
+    childInitFunctionsDefault(child);
 
     return child;
 }

@@ -1,4 +1,5 @@
 #include "ComboBox.h"
+#include "Child.h"
 #include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
@@ -7,14 +8,7 @@
 // This checks if the index passed is valid.
 static bool comboBoxIndexIsValid(Child *child, int index);
 
-Child *windowAddComboxBox(Window *window,
-                          int x,
-                          int y,
-                          int width,
-                          int height,
-                          DWORD style,
-                          EventFunction eventFunction,
-                          void *data)
+Child *windowAddComboxBox(Window *window, int x, int y, int width, int height, DWORD style)
 {
     if (!window->children)
     {
@@ -39,10 +33,12 @@ Child *windowAddComboxBox(Window *window,
                                    NULL,
                                    window->appHandle,
                                    NULL);
+    if (!child->handle)
+    {
+        return NULL;
+    }
 
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
+    childInitFunctionsDefault(child);
 
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 

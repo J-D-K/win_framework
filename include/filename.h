@@ -1,6 +1,9 @@
 #pragma once
 #include "Window_external.h"
 
+// This contains functions for getting filenames for opening and saving files.
+// To do: Apparently these functions are deprecated and something else should be used now?
+
 /// @brief Gets an open filename.
 /// @param window Window that owns the dialog.
 /// @param title Title of the dialog.

@@ -16,14 +16,7 @@ extern "C"
     /// @param eventFunction Function executed on event.
     /// @param data Data to pass to eventFunction.
     /// @return Window pointer on success. NULL on failure.1
-    Child *windowAddComboxBox(Window *window,
-                              int x,
-                              int y,
-                              int width,
-                              int height,
-                              DWORD style,
-                              EventFunction eventFunction,
-                              void *data);
+    Child *windowAddComboxBox(Window *window, int x, int y, int width, int height, DWORD style);
 
     /// @brief Adds a string to a combobox.
     /// @param window Window struct with a handle to a combo box.

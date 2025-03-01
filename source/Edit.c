@@ -1,17 +1,11 @@
 #include "Edit.h"
+#include "Child.h"
 #include <commctrl.h>
 
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-Child *windowAddEdit(Window *window,
-                     int x,
-                     int y,
-                     int width,
-                     int height,
-                     DWORD style,
-                     EventFunction eventFunction,
-                     void *data)
+Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD style)
 {
     // Children check
     if (!window->children)
@@ -49,9 +43,7 @@ Child *windowAddEdit(Window *window,
                                    window->appHandle,
                                    NULL);
 
-    // Make sure we set the function and ID.
-    child->eventFunction = eventFunction;
-    child->data = data;
+    childInitFunctionsDefault(child);
 
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
