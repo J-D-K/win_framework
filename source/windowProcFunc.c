@@ -31,8 +31,6 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_COMMAND:
         {
-            printf("WM_COMMAND\n");
-
             // This is the only real way to be sure it's a menu event?
             if (HIWORD(wParam) == 0 && (HWND)lParam == NULL)
             {
@@ -68,7 +66,7 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_NOTIFY:
         {
-            printf("WM_NOTIFY\n");
+            // This is what tab controls use.
         }
         break;
 
@@ -107,6 +105,7 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
     }
     return DefWindowProc(handle, message, wParam, lParam);
 }
+
 
 static void windowDestroy(void *windowIn)
 {

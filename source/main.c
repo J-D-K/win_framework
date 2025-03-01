@@ -44,6 +44,10 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
+    // This is to test and see if the set ideal works.
+    Child *testButton = windowAddButton(mainWindow, 8, 32, 0, 0, "Test Button", BS_CENTER, NULL, NULL);
+    buttonSetIdealSize(testButton);
+
     windowShow(mainWindow);
 
     while (windowUpdate(mainWindow))

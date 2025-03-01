@@ -16,6 +16,10 @@ struct DynamicArray
     ElementFreeFunction freeFunction;
 };
 
+// Declarations here. Defs later.
+// Frees all elements in the array. This is needed by two functions in this file.
+static void dynamicArrayFreeAll(DynamicArray *array);
+
 DynamicArray *dynamicArrayCreate(size_t elementSize, ElementFreeFunction freeFunction)
 {
     // This is the array we're returning.
@@ -43,22 +47,9 @@ void dynamicArrayDestroy(DynamicArray *array)
         return;
     }
 
-    // If the free function is defined, use that.
-    if (array->freeFunction)
-    {
-        for (size_t i = 0; i < array->size; i++)
-        {
-            (*array->freeFunction)(array->array[i]);
-        }
-    }
-    else
-    {
-        // Just free the elements in this case.
-        for (size_t i = 0; i < array->size; i++)
-        {
-            free(array->array[i]);
-        }
-    }
+    // This will free all the elements.
+    dynamicArrayFreeAll(array);
+
     // Free the array itself.
     free(array);
     // Set the array to NULL for segfaults.
@@ -160,6 +151,19 @@ void dynamicArrayEraseRange(DynamicArray *array, int begin, int end)
     array->array = realloc(array->array, sizeof(void *) * (array->size -= end - begin));
 }
 
+void dynamicArrayClear(DynamicArray *array)
+{
+    // Free all of the elements.
+    dynamicArrayFreeAll(array);
+
+    // Free the array itself and make sure it's NULL.
+    free(array->array);
+    array->array = NULL;
+
+    // Reset size to 0.
+    array->size = 0;
+}
+
 void *dynamicArrayGet(DynamicArray *array, int index)
 {
     if (index < 0 || index >= (int)array->size)
@@ -167,4 +171,31 @@ void *dynamicArrayGet(DynamicArray *array, int index)
         return NULL;
     }
     return array->array[index];
+}
+
+static void dynamicArrayFreeAll(DynamicArray *array)
+{
+    if (!array || !array->array)
+    {
+        // Just bail since there's nothing to do.
+        return;
+    }
+
+    // Loop and free all the elements.
+    if (array->freeFunction)
+    {
+        // Free elements using the passed function.
+        for (int i = 0; i < array->size; i++)
+        {
+            (*array->freeFunction)(array->array[i]);
+        }
+    }
+    else
+    {
+        // Just do it the old fashioned way.
+        for (int i = 0; i < array->size; i++)
+        {
+            free(array->array[i]);
+        }
+    }
 }

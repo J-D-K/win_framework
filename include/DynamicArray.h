@@ -45,6 +45,10 @@ void dynamicArrayErase(DynamicArray *array, int index);
 /// @param end The final element to erase.
 void dynamicArrayEraseRange(DynamicArray *array, int begin, int end);
 
+/// @brief Frees and clears all elements in the array. Array is still valid with this call.
+/// @param array Array to clear.
+void dynamicArrayClear(DynamicArray *array);
+
 /// @brief Gets the element at index.
 /// @param array Array to get the element from.
 /// @param index Index to get.

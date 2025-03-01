@@ -63,6 +63,18 @@ Child *windowAddButton(Window *window,
     return child;
 }
 
+bool buttonSetIdealSize(Child *child)
+{
+    // Struct to get the size.
+    SIZE buttonSize = {0};
+    if (SendMessage(child->handle, BCM_GETIDEALSIZE, 0, (LONG_PTR)&buttonSize) == FALSE)
+    {
+        return false;
+    }
+    // I guess this is the way to do this?
+    return SetWindowPos(child->handle, NULL, 0, 0, buttonSize.cx, buttonSize.cy, SWP_NOMOVE) == TRUE;
+}
+
 bool buttonGetCheck(Child *child)
 {
     return SendMessage(child->handle, BM_GETCHECK, 0, 0) == BST_CHECKED;

@@ -28,6 +28,11 @@ extern "C"
                            EventFunction eventFunction,
                            void *data);
 
+    /// @brief Sets the ideal size of a button according to Windows.
+    /// @param child Button to set the size for.
+    /// @return True on success. False on failure.
+    bool buttonSetIdealSize(Child *child);
+
     /// @brief Returns if the window passed is check (RADIOBUTTON and CHECKBOX)
     /// @param child Child window to check.
     /// @return True if checked. False if not.
