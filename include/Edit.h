@@ -22,6 +22,23 @@ extern "C"
     /// @return Length of the text.
     int editGetTextLength(Child *child);
 
+    /// @brief Gets the character index of the the line at lineIndex.
+    /// @param child Edit to get the index of.
+    /// @param lineIndex Line to get the starting character index of.
+    /// @return Index of the starting character of the line.
+    int editGetLineIndex(Child *child, int lineIndex);
+
+    /// @brief Gets the length if the line at index.
+    /// @param child Edit to get the length of.
+    /// @param index Index of the line to get the length of.
+    /// @return Number of characters int the line.
+    int editGetLineLength(Child *child, int index);
+
+    /// @brief Gets the number of lines in a multi-line edit control.
+    /// @param child Edit to get the count of.
+    /// @return Number of lines in the edit.
+    int editGetLineCount(Child *child);
+
     /// @brief Retrieves the text from a window.
     /// @param window Window of input.
     /// @param id ID of the input.
@@ -29,6 +46,14 @@ extern "C"
     /// @param bufferSize Size of the buffer to write text to.
     /// @return True on success. False on failure or buffer is too small.
     bool editGetText(Child *child, char *buffer, size_t bufferSize);
+
+    /// @brief Gets the line at index from a multi-line edit control.
+    /// @param child Edit control to get line from.
+    /// @param index Index of line to get.
+    /// @param buffer Buffer to write the line to.
+    /// @param bufferSize Size of the buffer to write the line to.
+    /// @return True on success. False on failure.
+    bool editGetLine(Child *child, int index, char *buffer, int bufferSize);
 
     /// @brief Sets the text of a window.
     /// @param window Window owning text input.

@@ -10,19 +10,6 @@ static const COLORREF TAB_BACKGROUND = RGB(0xFF, 0xFF, 0xFF);
 // Text color.
 static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
 
-static void buttonFunction(Window *window, WPARAM wParam, LPARAM lParam, void *dataIn)
-{
-    MessageBox(windowGetHandle(window), "Button clicked.", "WOOOO", MB_ICONEXCLAMATION);
-}
-
-static void fileOpenFunction(Window *window, WPARAM wParam, LPARAM lParam, void *dataIn)
-{
-    MessageBox(windowGetHandle(window),
-               "This is where a file dialog would be if I felt like adding it right now.",
-               "Laziness kicked in.",
-               MB_ICONERROR);
-}
-
 int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
     // Creating menus goes reverse compared to how you'd think.
@@ -53,15 +40,12 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
         MessageBox(NULL, "Error creating main window.", "Error", MB_ICONERROR);
         return -1;
     }
+
     // Set text crap.
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    Child *testButton = windowAddButton(mainWindow, 8, 24, 0, 0, "Click this.", BS_CENTER);
-    buttonSetIdealSize(testButton);
-
-    windowAddMenuEvent(mainWindow, openId, fileOpenFunction, NULL);
-    childSetCommandFunction(testButton, buttonFunction, NULL);
+    Child *windowAddTabControl(mainWindow, );
 
     windowShow(mainWindow);
 

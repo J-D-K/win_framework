@@ -57,6 +57,23 @@ int editGetTextLength(Child *child)
     return SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0) + 1;
 }
 
+int editGetLineIndex(Child *child, int lineIndex)
+{
+    return SendMessage(child->handle, EM_LINEINDEX, lineIndex, 0);
+}
+
+int editGetLineCount(Child *child)
+{
+    return SendMessage(child->handle, EM_GETLINECOUNT, 0, 0);
+}
+
+int editGetLineLength(Child *child, int index)
+{
+    // MS's documentation of this is kind of confusing. It says it gets the length of the line passed as WPARAM,
+    // but also says it's the index of the character? I guess you need to get the line index first?
+    return SendMessage(child->handle, EM_LINELENGTH, index, 0);
+}
+
 bool editGetText(Child *child, char *buffer, size_t bufferSize)
 {
     // Get the length first before continuing.
@@ -67,6 +84,15 @@ bool editGetText(Child *child, char *buffer, size_t bufferSize)
     }
     // One is subtracted to account for the NULL terminator, which Windows doesn't count?
     return SendMessage(child->handle, WM_GETTEXT, bufferSize, (LONG_PTR)buffer) == textLength - 1;
+}
+
+bool editGetLine(Child *child, int index, char *buffer, int bufferSize)
+{
+    if (bufferSize < editGetLineLength(child, index))
+    {
+        return false;
+    }
+    return SendMessage(child->handle, EM_GETLINE, index, (LONG_PTR)buffer) > 0;
 }
 
 bool editSetText(Child *child, const char *text)
