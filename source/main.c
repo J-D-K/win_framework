@@ -4,11 +4,9 @@
 #include <string.h>
 
 // Window background color
-static const COLORREF WINDOW_BACKGROUND = RGB(0xF0, 0xF0, 0xF0);
-// White for tab background.
-static const COLORREF TAB_BACKGROUND = RGB(0xFF, 0xFF, 0xFF);
+static const COLORREF WINDOW_BACKGROUND = RGB(0x2D, 0x2D, 0x2D);
 // Text color.
-static const COLORREF TEXT_COLOR = RGB(0x00, 0x00, 0x00);
+static const COLORREF TEXT_COLOR = RGB(0xFF, 0xFF, 0xFF);
 
 int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
@@ -28,8 +26,8 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
                                       "Main Window",
                                       WINDOW_CENTER,
                                       WINDOW_CENTER,
-                                      1920,
-                                      1080,
+                                      1280,
+                                      720,
                                       WINDOW_MAIN_DEFAULT_STYLE,
                                       WINDOW_BACKGROUND,
                                       mainMenu,
@@ -45,7 +43,11 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
-    Child *windowAddTabControl(mainWindow, );
+    editSetBorderColor(RGB(0x20, 0x20, 0x20));
+    editSetBackgroundColor(RGB(0x3D, 0x3D, 0x3D));
+    editSetTextColor(RGB(0xFF, 0xFF, 0xFF));
+
+    windowAddEdit(mainWindow, 16, 16, 640, AUTO_SIZE, ES_PASSWORD | ES_AUTOHSCROLL);
 
     windowShow(mainWindow);
 

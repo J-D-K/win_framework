@@ -17,6 +17,18 @@ extern "C"
     /// @return Handle of the window/child on success. NULL on failure.
     Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD style);
 
+    /// @brief Sets the border color of the edit.
+    /// @param color Color to set the border to.
+    void editSetBorderColor(COLORREF color);
+
+    /// @brief Sets the background color of edit controls.
+    /// @param color Color to draw the background with.
+    void editSetBackgroundColor(COLORREF color);
+
+    /// @brief Sets the text color of edit controls.
+    /// @param color Color to draw text with.
+    void editSetTextColor(COLORREF color);
+
     /// @brief Gets the length of the text in the edit control.
     /// @param window Edit to get the length of.
     /// @return Length of the text.
@@ -24,9 +36,9 @@ extern "C"
 
     /// @brief Gets the character index of the the line at lineIndex.
     /// @param child Edit to get the index of.
-    /// @param lineIndex Line to get the starting character index of.
+    /// @param index Line to get the starting character index of.
     /// @return Index of the starting character of the line.
-    int editGetLineIndex(Child *child, int lineIndex);
+    int editGetLineIndex(Child *child, int index);
 
     /// @brief Gets the length if the line at index.
     /// @param child Edit to get the length of.

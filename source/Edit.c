@@ -5,6 +5,21 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
+// Border color
+COLORREF EDIT_BORDER_COLOR;
+// Background color.
+COLORREF EDIT_BACKGROUND_COLOR;
+// Text color.
+COLORREF EDIT_TEXT_COLOR;
+
+// Declaration here. Definition later.
+static LRESULT editDrawProc(HWND handle,
+                            UINT message,
+                            WPARAM wParam,
+                            LPARAM lParam,
+                            UINT_PTR subClassId,
+                            DWORD_PTR refData);
+
 Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD style)
 {
     // Children check
@@ -33,7 +48,7 @@ Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD 
     child->handle = CreateWindowEx(0,
                                    WC_EDITA,
                                    NULL,
-                                   WS_CHILD | WS_BORDER | WS_VISIBLE | style,
+                                   WS_CHILD | WS_VISIBLE | WS_BORDER | style,
                                    x,
                                    y,
                                    width,
@@ -45,10 +60,28 @@ Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD 
 
     childInitFunctionsDefault(child);
 
+    // Set the subclass.
+    SetWindowSubclass(child->handle, editDrawProc, 0, 0);
+
     // Set the font.
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, MAKELPARAM(FALSE, 0));
 
     return child;
+}
+
+void editSetBorderColor(COLORREF color)
+{
+    EDIT_BORDER_COLOR = color;
+}
+
+void editSetBackgroundColor(COLORREF color)
+{
+    EDIT_BACKGROUND_COLOR = color;
+}
+
+void editSetTextColor(COLORREF color)
+{
+    EDIT_TEXT_COLOR = color;
 }
 
 int editGetTextLength(Child *child)
@@ -57,9 +90,9 @@ int editGetTextLength(Child *child)
     return SendMessage(child->handle, WM_GETTEXTLENGTH, 0, 0) + 1;
 }
 
-int editGetLineIndex(Child *child, int lineIndex)
+int editGetLineIndex(Child *child, int index)
 {
-    return SendMessage(child->handle, EM_LINEINDEX, lineIndex, 0);
+    return SendMessage(child->handle, EM_LINEINDEX, index, 0);
 }
 
 int editGetLineCount(Child *child)
@@ -106,4 +139,42 @@ void editAppendText(Child *child, const char *text)
     SendMessage(child->handle, EM_SETSEL, -1, -1);
     // Now we use replace to append it. I'm not sure how else to do this without having to read and append it and that seems stupid.
     SendMessage(child->handle, EM_REPLACESEL, FALSE, (LONG_PTR)text);
+}
+
+static LRESULT editDrawProc(HWND handle,
+                            UINT message,
+                            WPARAM wParam,
+                            LPARAM lParam,
+                            UINT_PTR subClassId,
+                            DWORD_PTR refData)
+{
+    switch (message)
+    {
+        case WM_PAINT:
+        {
+            // Begin paint.
+            PAINTSTRUCT paintStruct;
+            HDC context = BeginPaint(handle, &paintStruct);
+
+            // Select the pen and object to draw the rectangle.
+            SelectObject(context, CreatePen(PS_SOLID, 0, EDIT_BORDER_COLOR));
+            SelectObject(context, CreateSolidBrush(EDIT_BACKGROUND_COLOR));
+
+            // Draw the rectangle
+            Rectangle(context,
+                      paintStruct.rcPaint.left,
+                      paintStruct.rcPaint.top,
+                      paintStruct.rcPaint.right,
+                      paintStruct.rcPaint.bottom);
+
+
+            DefSubclassProc(handle, WM_PAINT, (WPARAM)context, lParam);
+
+            EndPaint(handle, &paintStruct);
+
+            return 0;
+        }
+        break;
+    }
+    return DefSubclassProc(handle, message, wParam, lParam);
 }

@@ -7,6 +7,11 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
+// Colors for coloring stuff.
+extern COLORREF EDIT_BORDER_COLOR;
+extern COLORREF EDIT_BACKGROUND_COLOR;
+extern COLORREF EDIT_TEXT_COLOR;
+
 // This are declared and defined here, because it is called when the WM_CLOSE message is received.
 static void windowDestroy(void *windowIn);
 // This handles menu events
@@ -40,6 +45,14 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
             {
                 return handleControlEvents(window, wParam, lParam);
             }
+        }
+        break;
+
+        case WM_CTLCOLOREDIT:
+        {
+            SetBkColor((HDC)wParam, EDIT_BACKGROUND_COLOR);
+            SetTextColor((HDC)wParam, EDIT_TEXT_COLOR);
+            return (LRESULT)CreateSolidBrush(EDIT_BACKGROUND_COLOR);
         }
         break;
 
