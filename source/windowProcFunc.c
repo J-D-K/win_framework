@@ -7,10 +7,15 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
-// Colors for coloring stuff.
-extern COLORREF EDIT_BORDER_COLOR;
-extern COLORREF EDIT_BACKGROUND_COLOR;
-extern COLORREF EDIT_TEXT_COLOR;
+// Colors for coloring edit controls.
+extern COLORREF g_editBorderColor;
+extern COLORREF g_editBackgroundColor;
+extern COLORREF g_editTextColor;
+
+// Colors for button controls.
+extern COLORREF g_buttonBorderColor;
+extern COLORREF g_buttonBackgroundColor;
+extern COLORREF g_buttonTextColor;
 
 // This are declared and defined here, because it is called when the WM_CLOSE message is received.
 static void windowDestroy(void *windowIn);
@@ -48,15 +53,23 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
 
-        case WM_CTLCOLOREDIT:
+        case WM_CTLCOLORBTN:
         {
-            SetBkColor((HDC)wParam, EDIT_BACKGROUND_COLOR);
-            SetTextColor((HDC)wParam, EDIT_TEXT_COLOR);
-            return (LRESULT)CreateSolidBrush(EDIT_BACKGROUND_COLOR);
+            // To do: Handle different types.
+            SetBkColor((HDC)wParam, g_buttonBackgroundColor);
+            SetTextColor((HDC)wParam, g_buttonTextColor);
+            return (LRESULT)CreateSolidBrush(g_buttonBackgroundColor);
         }
         break;
 
-        case WM_CTLCOLORBTN:
+        case WM_CTLCOLOREDIT:
+        {
+            SetBkColor((HDC)wParam, g_editBackgroundColor);
+            SetTextColor((HDC)wParam, g_editTextColor);
+            return (LRESULT)CreateSolidBrush(g_editBackgroundColor);
+        }
+        break;
+
         case WM_CTLCOLORSTATIC:
         {
             // This is needed to make sure read-only edit controls don't get colored weird.
@@ -64,9 +77,20 @@ LRESULT windowProcFunc(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
             GetClassName((HWND)lParam, className, 32);
             if (strcmp(className, "Edit") == 0)
             {
-                // Set the background mode to opaque and return white for edit controls.
-                SetBkMode((HDC)wParam, OPAQUE);
-                return (LRESULT)CreateSolidBrush(RGB(0xFF, 0xFF, 0xFF));
+                // This will color read-only edits the same as normal ones.
+                SetBkColor((HDC)wParam, g_editBackgroundColor);
+                SetTextColor((HDC)wParam, g_editTextColor);
+                return (LRESULT)CreateSolidBrush(g_editBackgroundColor);
+            }
+            else if (strcmp(className, "Button") == 0)
+            {
+                // Grab the button style.
+                LONG_PTR buttonStyle = GetWindowLongPtr((HWND)lParam, GWL_STYLE);
+
+                // The group box gets colored differently.
+                if (buttonStyle & BS_GROUPBOX)
+                {
+                }
             }
             else
             {

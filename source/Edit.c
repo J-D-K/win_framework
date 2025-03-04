@@ -6,11 +6,11 @@
 #include "Window_internal.h"
 
 // Border color
-COLORREF EDIT_BORDER_COLOR;
+COLORREF g_editBorderColor;
 // Background color.
-COLORREF EDIT_BACKGROUND_COLOR;
+COLORREF g_editBackgroundColor;
 // Text color.
-COLORREF EDIT_TEXT_COLOR;
+COLORREF g_editTextColor;
 
 // Declaration here. Definition later.
 static LRESULT editDrawProc(HWND handle,
@@ -71,17 +71,17 @@ Child *windowAddEdit(Window *window, int x, int y, int width, int height, DWORD 
 
 void editSetBorderColor(COLORREF color)
 {
-    EDIT_BORDER_COLOR = color;
+    g_editBorderColor = color;
 }
 
 void editSetBackgroundColor(COLORREF color)
 {
-    EDIT_BACKGROUND_COLOR = color;
+    g_editBackgroundColor = color;
 }
 
 void editSetTextColor(COLORREF color)
 {
-    EDIT_TEXT_COLOR = color;
+    g_editTextColor = color;
 }
 
 int editGetTextLength(Child *child)
@@ -157,8 +157,8 @@ static LRESULT editDrawProc(HWND handle,
             HDC context = BeginPaint(handle, &paintStruct);
 
             // Select the pen and object to draw the rectangle.
-            SelectObject(context, CreatePen(PS_SOLID, 0, EDIT_BORDER_COLOR));
-            SelectObject(context, CreateSolidBrush(EDIT_BACKGROUND_COLOR));
+            SelectObject(context, CreatePen(PS_SOLID, 0, g_editBorderColor));
+            SelectObject(context, CreateSolidBrush(g_editBackgroundColor));
 
             // Draw the rectangle
             Rectangle(context,
@@ -166,7 +166,6 @@ static LRESULT editDrawProc(HWND handle,
                       paintStruct.rcPaint.top,
                       paintStruct.rcPaint.right,
                       paintStruct.rcPaint.bottom);
-
 
             DefSubclassProc(handle, WM_PAINT, (WPARAM)context, lParam);
 

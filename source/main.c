@@ -8,6 +8,11 @@ static const COLORREF WINDOW_BACKGROUND = RGB(0x2D, 0x2D, 0x2D);
 // Text color.
 static const COLORREF TEXT_COLOR = RGB(0xFF, 0xFF, 0xFF);
 
+static void buttonClick(Window *window, WPARAM wParam, LPARAM lParam, void *dataIn)
+{
+    MessageBox(windowGetHandle(window), "LOL", "Button", MB_ICONASTERISK);
+}
+
 int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline, int cmdShow)
 {
     // Creating menus goes reverse compared to how you'd think.
@@ -43,11 +48,22 @@ int WINAPI WinMain(HINSTANCE appHandle, HINSTANCE pHInstance, char *commandline,
     windowSetFont(mainWindow, "Arial", 14);
     windowSetTextColor(mainWindow, TEXT_COLOR);
 
+    // Set button shit.
+    buttonSetBorderColor(RGB(0x20, 0x20, 0x20));
+    buttonSetBackgroundColor(RGB(0x3D, 0x3D, 0x3D));
+    buttonSetTextColor(RGB(0xFF, 0xFF, 0xFF));
+
+    // Set edit shit.
     editSetBorderColor(RGB(0x20, 0x20, 0x20));
-    editSetBackgroundColor(RGB(0x3D, 0x3D, 0x3D));
+    editSetBackgroundColor(RGB(0x1D, 0x1D, 0x1D));
     editSetTextColor(RGB(0xFF, 0xFF, 0xFF));
 
-    windowAddEdit(mainWindow, 16, 16, 640, AUTO_SIZE, ES_PASSWORD | ES_AUTOHSCROLL);
+    Child *input = windowAddEdit(mainWindow, 16, 16, 480, AUTO_SIZE, ES_AUTOHSCROLL);
+
+    Child *button = windowAddButton(mainWindow, 16, 48, 0, 0, "Test Button", BS_CENTER);
+    buttonSetIdealSize(button);
+
+    childSetCommandFunction(button, buttonClick, NULL);
 
     windowShow(mainWindow);
 

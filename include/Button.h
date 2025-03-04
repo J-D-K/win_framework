@@ -20,6 +20,18 @@ extern "C"
     /// @return Handle of the window/child on success. NULL on failure.
     Child *windowAddButton(Window *window, int x, int y, int width, int height, const char *buttonText, DWORD style);
 
+    /// @brief Sets the border or outline color of buttons and BS_GROUPBOX.
+    /// @param color Color to draw borders/outlines with.
+    void buttonSetBorderColor(COLORREF color);
+
+    /// @brief Sets the background color of buttons.
+    /// @param color Color to use to draw the background of.
+    void buttonSetBackgroundColor(COLORREF color);
+
+    /// @brief Sets the text color of buttons.
+    /// @param color Color to draw button text with.
+    void buttonSetTextColor(COLORREF color);
+
     /// @brief Sets the ideal size of a button according to Windows.
     /// @param child Button to set the size for.
     /// @return True on success. False on failure.

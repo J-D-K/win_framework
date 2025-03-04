@@ -5,6 +5,19 @@
 #define __WINDOW_INTERNAL__
 #include "Window_internal.h"
 
+// Colors used to draw buttons.
+COLORREF g_buttonBorderColor;
+COLORREF g_buttonBackgroundColor;
+COLORREF g_buttonTextColor;
+
+// Declarations here. Definitions later.
+static LRESULT buttonSubProc(HWND handle,
+                             UINT message,
+                             WPARAM wParam,
+                             LPARAM lParam,
+                             UINT_PTR subClass,
+                             DWORD_PTR refData);
+
 Child *windowAddButton(Window *window, int x, int y, int width, int height, const char *buttonText, DWORD style)
 {
     // Children check
@@ -49,9 +62,26 @@ Child *windowAddButton(Window *window, int x, int y, int width, int height, cons
 
     childInitFunctionsDefault(child);
 
+    SetWindowSubclass(child->handle, buttonSubProc, 0, 0);
+
     SendMessage(child->handle, WM_SETFONT, (WPARAM)window->font, 0);
 
     return child;
+}
+
+void buttonSetBorderColor(COLORREF color)
+{
+    g_buttonBorderColor = color;
+}
+
+void buttonSetBackgroundColor(COLORREF color)
+{
+    g_buttonBackgroundColor = color;
+}
+
+void buttonSetTextColor(COLORREF color)
+{
+    g_buttonTextColor = color;
 }
 
 int buttonGetWidth(Child *child)
@@ -97,4 +127,58 @@ bool buttonGetCheck(Child *child)
 void buttonSetCheck(Child *child, bool check)
 {
     SendMessage(child->handle, BM_SETCHECK, check ? BST_CHECKED : BST_UNCHECKED, 0);
+}
+
+static LRESULT buttonSubProc(HWND handle,
+                             UINT message,
+                             WPARAM wParam,
+                             LPARAM lParam,
+                             UINT_PTR subClass,
+                             DWORD_PTR refData)
+{
+    switch (message)
+    {
+        case WM_PAINT:
+        {
+            PAINTSTRUCT paintStruct;
+            HDC context = BeginPaint(handle, &paintStruct);
+
+            // Grab the font
+            HFONT buttonFont = (HFONT)SendMessage(handle, WM_GETFONT, 0, 0);
+
+            // Create/select pen, brush, and font.
+            SelectObject(context, CreatePen(PS_SOLID, 0, g_buttonBorderColor));
+            SelectObject(context, CreateSolidBrush(g_buttonBackgroundColor));
+            SelectObject(context, buttonFont);
+
+            // Set the context
+            SetBkColor(context, g_buttonBackgroundColor);
+            SetTextColor(context, g_buttonTextColor);
+
+            // Draw the rectangle.
+            Rectangle(context,
+                      paintStruct.rcPaint.left,
+                      paintStruct.rcPaint.top,
+                      paintStruct.rcPaint.right,
+                      paintStruct.rcPaint.bottom);
+
+            // I guess you need to draw the text yourself for buttons?
+            int textLength = GetWindowTextLength(handle) + 1;
+            char buttonText[textLength];
+            memset(buttonText, 0x00, textLength);
+            GetWindowText(handle, buttonText, textLength);
+
+            // Text out and hope everything is OK!
+            DrawText(context,
+                     buttonText,
+                     strlen(buttonText),
+                     &paintStruct.rcPaint,
+                     DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+            EndPaint(handle, &paintStruct);
+            return 0;
+        }
+        break;
+    }
+    return DefSubclassProc(handle, message, wParam, lParam);
 }
